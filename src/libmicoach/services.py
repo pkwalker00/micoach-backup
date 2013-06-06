@@ -11,8 +11,8 @@ class miCoachService(object):
     authcookie = ""
     
     def __init__(self, service, email=None, password=None):
-        self.location = ("/v2.0/Services/%s") % service
-        self.http = httplib.HTTPConnection("www.micoach.com")
+        self.location = ("/Services/%s") % service
+        self.http = httplib.HTTPConnection("micoach.adidas.com")
 
         if not miCoachService.isconnected:
             if not email or not password:
@@ -52,12 +52,12 @@ class miCoachService(object):
                   "Connection": "keep-alive",
                   "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                  }
-        https = httplib.HTTPSConnection("www.adidas.com", 443)
-        https.request("POST", "/ca/micoach/login.aspx", params, headers)
+        https = httplib.HTTPSConnection("micoach.adidas.com", 443)
+        https.request("POST", "/Login.aspx", params, headers)
         http_authcookie = https.getresponse().getheader('set-cookie')
         
-        params = urllib.urlencode({'password': password, 'email': email})
-        self.http.request("GET", "/v2.0/Services/UserProfileWs.asmx/Login?"+params, headers={'cookie':http_authcookie})
+	params = urllib.urlencode({'email':email})+"&"+urllib.urlencode({'password':password})+"&isRememberMeSelected=False&TimeZoneInfo="
+        self.http.request("GET", "/Services/UserProfileWS.asmx/miCoachLogin?"+params, headers={'cookie':http_authcookie})
         response = self.http.getresponse()
         xml = SimpleXMLElement(text=response.read())
 
