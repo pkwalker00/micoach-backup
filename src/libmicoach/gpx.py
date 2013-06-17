@@ -34,11 +34,11 @@ def writeGpx(filename, content):
     etree.SubElement(metadata, 'time').text = str(start)
     bounds = etree.SubElement(metadata, 'bounds')
 
-    lat = ()
-    lon = ()
+    lat = []
+    lon = []
     for point in xml.iter(xa.nodestring(xml, 'CompletedWorkoutDataPoint')):
-        lat = lat + (float(point.find(xa.findstring(xml, 'Latitude')).text),)
-        lon = lon + (float(point.find(xa.findstring(xml, 'Longitude')).text),)
+        lat.append(float(point.find(xa.findstring(xml, 'Latitude')).text))
+        lon.append(float(point.find(xa.findstring(xml, 'Longitude')).text))
 
     bounds.set("minlat", str(min(lat)))
     bounds.set("minlon", str(min(lon)))
