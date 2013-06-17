@@ -1,38 +1,33 @@
-import logging
-
-log = logging.getLogger(__name__)
-
-from libmicoach.services import *
-from libmicoach.schedule import *
-from libmicoach.errors import *
+from libmicoach import services, schedule
+import libmicoach.xmlassist as xa
+from lxml import etree
 
 class miCoachUser(object):
+    
     def __init__(self, email=None, password=None):
-        log.debug('Starting initializing miCoach user')
-        if not email is None and not password is None:
-            self.login(email, password)
-
+        if email != None and password != None:
+             self.login(email, password)
 
     def login(self, email, password):
-        self.profile = UserProfile(email, password)
-        self.schedule = Schedule()
-        
-        self.getProfile()
-        
-    def getProfile(self):
-        log.debug('Retrieving user informations')
-        
-        profile = self.profile.GetUserProfile()
-        self.screenName = str(profile.ScreenName)
-        self.email = str(profile.Email)
+       self.profile = services.UserProfile(email, password)
+       self.schedule = schedule.Schedule()
+       self.getProfile()
 
-    def logout(self):
-        pass
-        
-    def testConnection(self):
-        pass
-        
+    def getProfile(self):
+
+        profile = self.profile.GetUserGeneralSettings()
+        self.screenname = xa.search(profile, 'ScreenName')
+        self.email = xa.search(profile, 'Email')
+        self.firstname = xa.search(profile, 'FirstName')
+        self.lastname = xa.search(profile, 'LastName')
+        self.unitofdistance = int(xa.search(profile, 'UserUnitOfDistancePreference'))
+        self.unitofweight = int(xa.search(profile, 'UserUnitOfWeightPreference'))
+        self.unitofheight = int(xa.search(profile, 'UserUnitOfHeightPreference'))
+        if int(xa.findvalue(profile, 'Gender')) == 1:
+            self.gender = 'Male'
+        else:
+            self.gender = 'Female'
+        self.country = xa.search(profile, 'CountryCode')
+
     def getSchedule(self):
         return self.schedule
-    
-    
