@@ -67,7 +67,6 @@ def writeTcx(filename, content):
             etree.SubElement(trackpoint, 'DistanceMeters').text = point.find(xa.findstring(xml, 'Distance')).text
         if hr_active != 0:
             hrbpm = etree.SubElement(trackpoint, 'HeartRateBpm', attrib={'{'+xsi+'}type': 'HeartRateInBeatsPerMinute_t'})
-            # hrbpm.set('HeartRateInBeatsPerMinute_t')
             etree.SubElement(hrbpm, 'Value').text = point.find(xa.findstring(xml, 'HeartRate')).text
 
     #Write Completed tcx file
