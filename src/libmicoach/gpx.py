@@ -48,6 +48,8 @@ def writeGpx(filename, content):
     #Setup basic Track	
     trk = etree.SubElement(gpx, 'trk')
     cmt = etree.SubElement(trk, 'cmt')
+    cmt.text = xa.search(xml, 'UserNote')
+
     etree.SubElement(trk, 'src').text = 'Adidas miCoach' + u' \u00a9' 
     link = etree.SubElement(trk, 'link').set('href', 'https://micoach.adidas.com/us/Track/TrackWorkout?paramworkoutid='+xa.search(xml, 'CompletedWorkoutID')+'#Pace')
     etree.SubElement(trk, 'type').text = xa.search(xml,'ActivityType')
