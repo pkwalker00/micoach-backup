@@ -78,3 +78,7 @@ class Route(miCoachService):
 class Activity(miCoachService):
     def __init__(self, email=None, password=None):
         miCoachService.__init__(self, 'ActivityWS.asmx', email, password)
+
+def logout():
+    miCoachService.isconnected = False
+    miCoachService.auth_cookie = ''
