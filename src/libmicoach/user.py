@@ -16,7 +16,11 @@ class miCoachUser(object):
             self.workouts = self.schedule.getWorkoutList()
             self.logged_in = True
         except:
-            self.logged_in = False
+            pass
+
+    def logout(self):
+        self.logged_in = False
+        services.logout()
 
     def getProfile(self):
         profile = self.profile.GetUserGeneralSettings()
