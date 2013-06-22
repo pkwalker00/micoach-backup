@@ -13,8 +13,7 @@ class miCoachService(object):
 
         if miCoachService.isconnected == False:
             if email == None or password == None:
-                print(miCoachService.isconnected)
-                print("Missing Credentials")
+                return
 
             print("Not yet connected. Connecting...")
             self.connect(email, password)
@@ -29,7 +28,7 @@ class miCoachService(object):
 
     def GET(self, action, *args, **kwargs) :
         params = urllib.parse.urlencode(kwargs)
-        print('GET %s/%s?%s' % (self.location, action, params))
+        #print('GET %s/%s?%s' % (self.location, action, params))
         self.http.request('GET', ('%s/%s?%s') % (self.location, action, params), headers = {'cookie': self.auth_cookie})
         data = self.http.getresponse().read()
         return data
@@ -53,12 +52,9 @@ class miCoachService(object):
         status = xa.search(xml, 'ResultStatusMessage')
 
         if status == 'SUCCESS':
-            print('Login successful: (%s)' % (xa.search(xml, 'ScreenName')))
             miCoachService.auth_cookie = response.getheader('set-cookie') 
             miCoachService.isconnected = True
-        else:
-            print('Login failed: %s' % (status))
-                  
+
 class CompletedWorkout(miCoachService):
     def __init__(self, email=None, password=None):
         miCoachService.__init__(self, 'CompletedWorkoutWS.asmx', email, password)
