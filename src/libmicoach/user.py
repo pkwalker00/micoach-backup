@@ -1,20 +1,24 @@
 from libmicoach import services, schedule
 import libmicoach.xmlassist as xa
-from lxml import etree
 
 class miCoachUser(object):
     
     def __init__(self, email=None, password=None):
+        self.logged_in = False
         if email != None and password != None:
-             self.login(email, password)
+            self.login(email, password)
 
     def login(self, email, password):
-       self.profile = services.UserProfile(email, password)
-       self.schedule = schedule.Schedule()
-       self.getProfile()
+        try:
+            self.profile = services.UserProfile(email, password)
+            self.schedule = schedule.Schedule()
+            self.getProfile()
+            self.workouts = self.schedule.getWorkoutList()
+            self.logged_in = True
+        except:
+            self.logged_in = False
 
     def getProfile(self):
-
         profile = self.profile.GetUserGeneralSettings()
         self.screenname = xa.search(profile, 'ScreenName')
         self.email = xa.search(profile, 'Email')
@@ -31,3 +35,4 @@ class miCoachUser(object):
 
     def getSchedule(self):
         return self.schedule
+        
