@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from lxml import etree
 import libmicoach.xmlassist as xa
 from libmicoach import gpx, tcx
@@ -23,10 +23,11 @@ class WorkoutList(object):
     
     def __init__(self, data):
         self.content = []
-
+        self.log = []
         for w in data.iter(xa.nodestring(data, 'WorkoutLog')):
-            start = datetime.strptime(w.find(xa.findstring(data, 'StartDate')).text, '%Y-%m-%dT%H:%M:%S')
-            end = datetime.strptime(w.find(xa.findstring(data, 'StopDate')).text, '%Y-%m-%dT%H:%M:%S')
+            start = datetime.strptime(w.find(xa.findstring(data, 'StartDate')).text[:19], '%Y-%m-%dT%H:%M:%S')
+            end = datetime.strptime(w.find(xa.findstring(data, 'StopDate')).text[:19], '%Y-%m-%dT%H:%M:%S')
+        
             d = int(w.find(xa.findstring(data, 'Distance')).find(xa.findstring(data, 'Value')).text)
             if d > 1000:
                 distance = '%.1f km' % (d/1000.)
@@ -39,7 +40,9 @@ class WorkoutList(object):
             time = str(end-start)
             hr = int(w.find(xa.findstring(data, 'AvgHR')).find(xa.findstring(data, 'Value')).text)
             pace = float(w.find(xa.findstring(data, 'AvgPace')).find(xa.findstring(data, 'Value')).text)
-
+            
+            self.log.append([id, name, str(start), activity, type, time, distance, hr, pace])
+            
             self.content.append({'id': id,
                                  'name': name,
                                  'date': str(start),
