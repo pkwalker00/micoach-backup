@@ -5,7 +5,7 @@ class Schedule(object):
         self.workouts = services.CompletedWorkout()
 
     def getWorkoutList(self):
-        log = self.workouts.getWorkoutLog()
+        log = self.workouts.GetWorkoutLog()
         return workout.WorkoutList(log)
 
     def getLatestWorkout(self):
