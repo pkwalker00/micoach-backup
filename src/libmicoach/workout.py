@@ -41,7 +41,7 @@ class WorkoutList(object):
             hr = int(w.find(xa.findstring(data, 'AvgHR')).find(xa.findstring(data, 'Value')).text)
             pace = float(w.find(xa.findstring(data, 'AvgPace')).find(xa.findstring(data, 'Value')).text)
             
-            self.log.append([id, name, str(start), activity, type, time, distance, hr, pace])
+            self.log.append([id, name, str(start)[:10], str(start)[-8:][:5],  activity, type, time, distance, hr, str('{0:.2f}'.format(round(pace, 2)))])
             
             self.content.append({'id': id,
                                  'name': name,
