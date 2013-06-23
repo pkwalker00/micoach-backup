@@ -15,7 +15,6 @@ class miCoachService(object):
             if email == None or password == None:
                 return
 
-            print("Not yet connected. Connecting...")
             self.connect(email, password)
 
     def __getattr__(self, attr): 
