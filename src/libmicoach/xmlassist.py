@@ -1,5 +1,3 @@
-from lxml import etree
-
 """Helper functions for parsing xml using lxml"""
 def search(xmlroot, string):
     """Search xmlroot for string and return the text value"""
