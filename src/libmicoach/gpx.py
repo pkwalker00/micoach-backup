@@ -19,7 +19,7 @@ def writeGpx(filename, content):
     #Use computer's local timezone to correct UTC for daylight if needed
     delta = datetime.strptime(local, "%Y-%m-%dT%H:%M:%S") - datetime.now()
     datetz = dateutil.tz.tzlocal().tzname(datetime.now() + delta)
-	
+
     if parse(local + datetz).timetuple().tm_isdst != 0:
         start = start - timedelta(hours=1)
     
@@ -53,7 +53,7 @@ def writeGpx(filename, content):
     cmt.text = xa.search(xml, 'UserNote')
 
     etree.SubElement(trk, 'src').text = 'Adidas miCoach' + u' \u00a9' 
-    link = etree.SubElement(trk, 'link').set('href', 'https://micoach.adidas.com/us/Track/TrackWorkout?paramworkoutid='+xa.search(xml, 'CompletedWorkoutID')+'#Pace')
+    etree.SubElement(trk, 'link').set('href', 'https://micoach.adidas.com/us/Track/TrackWorkout?paramworkoutid='+xa.search(xml, 'CompletedWorkoutID')+'#Pace')
     etree.SubElement(trk, 'type').text = xa.search(xml,'ActivityType')
 
     #add track points from from source
@@ -61,8 +61,6 @@ def writeGpx(filename, content):
     
     #Add GPS data points
     
-    hr_active = int(xml.find(xa.findstring(xml, 'AvgHR'))[1].text)
-
     for point in xml.iter(xa.nodestring(xml, 'CompletedWorkoutDataPoint')):
         delta = timedelta(0, float(point.find(xa.findstring(xml, 'TimeFromStart')).text))
         trkpt = etree.SubElement(trkseg, 'trkpt')
