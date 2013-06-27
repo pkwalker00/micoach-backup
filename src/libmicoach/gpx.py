@@ -6,9 +6,9 @@ from lxml import etree
 
 def writeGpx(filename, content):
     """Convert miCoach xml to GPX format"""
-	
+    
     xml = content 
-
+    gps_active = xa.search(xml, 'GPSActive')
     utc = xa.search(xml, 'StartDateTimeUTC')
 
     local = xa.search(xml, 'StartDateTime')
@@ -32,18 +32,20 @@ def writeGpx(filename, content):
     metadata = etree.SubElement(gpx, 'metadata')
     etree.SubElement(metadata, 'name').text = xa.search(xml, 'WorkoutName')
     etree.SubElement(metadata, 'time').text = str(start)
-    bounds = etree.SubElement(metadata, 'bounds')
+    
+    if gps_active == 'true':
+        bounds = etree.SubElement(metadata, 'bounds')
 
-    lat = []
-    lon = []
-    for point in xml.iter(xa.nodestring(xml, 'CompletedWorkoutDataPoint')):
-        lat.append(float(point.find(xa.findstring(xml, 'Latitude')).text))
-        lon.append(float(point.find(xa.findstring(xml, 'Longitude')).text))
+        lat = []
+        lon = []
+        for point in xml.iter(xa.nodestring(xml, 'CompletedWorkoutDataPoint')):
+            lat.append(float(point.find(xa.findstring(xml, 'Latitude')).text))
+            lon.append(float(point.find(xa.findstring(xml, 'Longitude')).text))
 
-    bounds.set("minlat", str(min(lat)))
-    bounds.set("minlon", str(min(lon)))
-    bounds.set("maxlat", str(max(lat)))
-    bounds.set("maxlon", str(max(lon)))
+        bounds.set("minlat", str(min(lat)))
+        bounds.set("minlon", str(min(lon)))
+        bounds.set("maxlat", str(max(lat)))
+        bounds.set("maxlon", str(max(lon)))
     
     #Setup basic Track	
     trk = etree.SubElement(gpx, 'trk')
@@ -58,9 +60,7 @@ def writeGpx(filename, content):
     trkseg = etree.SubElement(trk, 'trkseg')
     
     #Add GPS data points
-	
-    gps_active = xa.search(xml, 'GPSActive')
-	
+    
     hr_active = int(xml.find(xa.findstring(xml, 'AvgHR'))[1].text)
 
     for point in xml.iter(xa.nodestring(xml, 'CompletedWorkoutDataPoint')):
