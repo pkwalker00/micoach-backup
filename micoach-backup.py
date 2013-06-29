@@ -38,24 +38,28 @@ class BackupWindow(Gtk.Window):
     def create_backup_options(self):
         box = Gtk.Box()
         
-        lable_convert = Gtk.Label("Backup Formats & Location:")
+        label_convert = Gtk.Label("Backup Formats & Location:")
         
         self.button_xml = Gtk.ToggleButton(label = "XML")
         self.button_xml.set_active(self.xml)
         self.button_xml.connect("toggled", self.on_xml_toggled)
+        self.button_xml.set_tooltip_text("Save raw xml sent from miCoach")
         
         self.button_gpx = Gtk.ToggleButton(label = "GPX")
         self.button_gpx.set_active(self.gpx)
         self.button_gpx.connect("toggled", self.on_gpx_toggled)
+        self.button_gpx.set_tooltip_text("Creates the smallest file. Ideal for GPS only workouts")
         
         self.button_tcx = Gtk.ToggleButton(label = "TCX")
         self.button_tcx.set_active(self.tcx)
         self.button_tcx.connect("toggled", self.on_tcx_toggled)
+        self.button_tcx.set_tooltip_text("Use this if your workout has Heart Rate info")
         
         self.button_files = Gtk.Button(label = None, image = Gtk.Image(stock = Gtk.STOCK_OPEN))
         self.button_files.connect("clicked", self.on_files_clicked)
+        self.button_files.set_tooltip_text("Change the default folder to save workout data")
         
-        box.pack_start(lable_convert, True, True, 0)
+        box.pack_start(label_convert, True, True, 0)
         box.pack_start(self.button_xml, True, True, 5)
         box.pack_start(self.button_gpx, True, True, 5)
         box.pack_start(self.button_tcx, True, True, 5)
