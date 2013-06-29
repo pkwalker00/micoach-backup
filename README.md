@@ -20,8 +20,9 @@ Usage
   - a computer and a *miCoach* account...
 
 No requirements with the win32 binary(I have not yet created a win32 binary), from the Python source code:
-  - [Python](http://www.python.org) 3.0+
-  - [Gtk+ 3](http://www.pyside.org)
+  - [Python 3+](http://www.python.org)
+  - [Gtk+ 3](http://www.gtk.org/)
+  - [PyGObject](https://wiki.gnome.org/PyGObject)
 
 **Installation**
 
@@ -50,7 +51,7 @@ BSD license.
 XML manipulation library (simplexml.py) by Mariano Reingar, LGPL license
 
 ----
-2012, Manuel Vonthron <manuel.vonthron@acadis.org>
+2012, Manuel Vonthron <manuel.vonthron@acadis.org>,
 2013, Patrick Walker
 
   [Adidas miCoach]: http://www.micoach.com/ 
