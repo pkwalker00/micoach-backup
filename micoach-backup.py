@@ -32,7 +32,7 @@ class BackupWindow(Gtk.Window):
         self.create_backup_options()
         self.create_progress_bar()
         self.create_workout_list()
-        
+        self.option_enable_toggle()
         self.show_all()
 
     def create_backup_options(self):
@@ -40,26 +40,25 @@ class BackupWindow(Gtk.Window):
         
         lable_convert = Gtk.Label("Backup Formats & Location:")
         
-        button_xml = Gtk.ToggleButton(label = "XML")
-        button_xml.set_active(self.xml)
-        button_xml.connect("toggled", self.on_xml_toggled)
+        self.button_xml = Gtk.ToggleButton(label = "XML")
+        self.button_xml.set_active(self.xml)
+        self.button_xml.connect("toggled", self.on_xml_toggled)
         
-        button_gpx = Gtk.ToggleButton(label = "GPX")
-        button_gpx.set_active(self.gpx)
-        button_gpx.connect("toggled", self.on_gpx_toggled)
+        self.button_gpx = Gtk.ToggleButton(label = "GPX")
+        self.button_gpx.set_active(self.gpx)
+        self.button_gpx.connect("toggled", self.on_gpx_toggled)
         
-        button_tcx = Gtk.ToggleButton(label = "TCX")
-        button_tcx.set_active(self.tcx)
-        button_tcx.connect("toggled", self.on_tcx_toggled)
+        self.button_tcx = Gtk.ToggleButton(label = "TCX")
+        self.button_tcx.set_active(self.tcx)
+        self.button_tcx.connect("toggled", self.on_tcx_toggled)
         
         self.button_files = Gtk.Button(label = None, image = Gtk.Image(stock = Gtk.STOCK_OPEN))
         self.button_files.connect("clicked", self.on_files_clicked)
-        self.button_files.set_sensitive(False)
         
         box.pack_start(lable_convert, True, True, 0)
-        box.pack_start(button_xml, True, True, 5)
-        box.pack_start(button_gpx, True, True, 5)
-        box.pack_start(button_tcx, True, True, 5)
+        box.pack_start(self.button_xml, True, True, 5)
+        box.pack_start(self.button_gpx, True, True, 5)
+        box.pack_start(self.button_tcx, True, True, 5)
         box.pack_start(self.button_files, True, True, 5)
         
         self.grid.attach(box, 1, 0, 1, 1)
@@ -169,8 +168,8 @@ class BackupWindow(Gtk.Window):
                 self.button_backup.set_sensitive(True)
                 self.entry_email.set_sensitive(False)
                 self.entry_pass.set_sensitive(False)
-                self.button_files.set_sensitive(True)
                 button.set_label("  Logout  ")
+                self.option_enable_toggle()
                 self.populate_workouts()
             else:
                 dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.WARNING, Gtk.ButtonsType.OK, "Login Failed")
@@ -186,7 +185,7 @@ class BackupWindow(Gtk.Window):
             self.entry_pass.set_sensitive(True)
             button.set_label("  Login  ")
             self.button_backup.set_sensitive(False)
-            self.button_files.set_sensitive(False)
+            self.option_enable_toggle()
             self.listmodel.clear()
     
     def populate_workouts(self):
@@ -384,5 +383,11 @@ class BackupWindow(Gtk.Window):
         self.progressbar.set_fraction(0)
         button.set_sensitive(False)
 
+    def option_enable_toggle(self):
+        self.button_xml.set_sensitive(not self.button_xml.get_sensitive())
+        self.button_gpx.set_sensitive(not self.button_gpx.get_sensitive())
+        self.button_tcx.set_sensitive(not self.button_tcx.get_sensitive())
+        self.button_files.set_sensitive(not self.button_files.get_sensitive())
+        
 win = BackupWindow()
 Gtk.main()
