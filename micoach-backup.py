@@ -14,7 +14,7 @@ class BackupWindow(Gtk.Window):
         self.set_default_size(1200, 600)
     
         self.config = configparser.ConfigParser()
-        self.config.read('backup.cfg')
+        self.config.read('config/backup.cfg')
         
         self.user = miCoachUser()
         
@@ -300,7 +300,7 @@ class BackupWindow(Gtk.Window):
         return prepared_list
     
     def save_config(self):
-        with open("backup.cfg", "w") as configfile:
+        with open("config/backup.cfg", "w") as configfile:
             self.config.write(configfile)
 
     def choose_backup_dialog(self):
