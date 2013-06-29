@@ -144,6 +144,10 @@ class BackupWindow(Gtk.Window):
 
     def on_backup_clicked(self, button):
         if len(self.to_convert) == 0:
+            dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.WARNING, Gtk.ButtonsType.OK, "No workout selected")
+            dialog.format_secondary_text("You must have at least one workout selected.")
+            dialog.run()
+            dialog.destroy()
             return
         self.button_cancel.set_sensitive(True)
         increment = self.find_progress_increment()
@@ -354,6 +358,15 @@ class BackupWindow(Gtk.Window):
                 workout_convert.writeTcx(save_to_folder+"/"+filename+".tcx")
                 self.update_progress(increment)
                 yield True
+
+        if self.button_checkall.get_active():
+            self.button_checkall.set_active(False)
+        path = 0
+        for item in self.listmodel:
+            item[0] = True
+            self.on_cell_toggled(item[0], path)
+            path = path + 1
+
         GObject.source_remove(self.id)
         dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Backup Complete!")
         dialog.format_secondary_text("Saved to: "+ self.folder+"/"+self.user.screenname+"/")
