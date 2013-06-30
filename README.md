@@ -23,6 +23,7 @@ No requirements with the win32 binary(I have not yet created a win32 binary), fr
   - [Python 3+](http://www.python.org)
   - [Gtk+ 3](http://www.gtk.org/)
   - [PyGObject](https://wiki.gnome.org/PyGObject)
+  - [lxml](http://lxml.de/)
 
 **Installation**
 
