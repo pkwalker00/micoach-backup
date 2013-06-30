@@ -12,13 +12,15 @@ class BackupWindow(Gtk.Window):
         self.connect("delete_event", Gtk.main_quit)
         self.set_border_width(10)
         self.set_default_size(1200, 600)
+        icon = Gtk.IconTheme.get_default().load_icon("gtk-harddisk", 64, 0)
+        self.set_icon(icon)
     
         self.config = configparser.ConfigParser()
         self.backup_config = os.path.expanduser("~")+"/miCoach/backup.cfg"
         if not os.path.exists(os.path.expanduser("~")+"/miCoach/"):
                     try:
                         os.makedirs(os.path.expanduser("~")+"/miCoach/")
-                    except:
+                    except: 
                         pass
         try:
             with open(self.backup_config): pass
