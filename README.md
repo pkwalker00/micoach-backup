@@ -19,7 +19,6 @@ Usage
 **Requirements**
   - a computer and a *miCoach* account...
 
-No requirements with the win32 binary(I have not yet created a win32 binary), from the Python source code:
   - [Python 3+](http://www.python.org)
   - [Gtk+ 3](http://www.gtk.org/)
   - [PyGObject](https://wiki.gnome.org/PyGObject)
