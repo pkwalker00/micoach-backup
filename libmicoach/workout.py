@@ -1,11 +1,10 @@
 from datetime import datetime
 from lxml import etree
 import libmicoach.xmlassist as xa
-from libmicoach import gpx, tcx
-
+from libmicoach import gpx, tcx, elevation
 class Workout(object):
     def __init__(self, content):
-        self.xml = content
+        self.xml = elevation.findelevation(content)
         self.id = xa.search(self.xml, 'CompletedWorkoutID')
         self.date = datetime.strptime(xa.search(self.xml, 'StartDateTime'), '%Y-%m-%dT%H:%M:%S')
         self.name = xa.search(self.xml, 'WorkoutName')
