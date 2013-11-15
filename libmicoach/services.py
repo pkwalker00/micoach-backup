@@ -35,17 +35,9 @@ class miCoachService(object):
     def connect(self, email, password):
 
         params = urllib.parse.urlencode({'email': email})+'&'+urllib.parse.urlencode({'password': password})+'&isRememberMeSelected=False&TimeZoneInfo='
-        headers = {
-                    'Content-Type': 'x-www-form-urlencoded',
-                    'Connection': 'keep-alive',
-                    'Accept': 'text/html'
-                    }
-        https = http.client.HTTPSConnection('micoach.adidas.com', 443)
-        https.request('POST', '/Login.aspx', params, headers)
-        https_authcookie = https.getresponse().getheader('set-cookie')
 
         self.http = http.client.HTTPConnection('micoach.adidas.com')
-        self.http.request('GET', '/Services/UserProfileWS.asmx/miCoachLogin?'+ params, headers = {'cookie': https_authcookie})
+        self.http.request('GET', '/Services/UserProfileWS.asmx/miCoachLogin?'+ params)
         response = self.http.getresponse()
         xml = etree.fromstring(response.read())
         status = xa.search(xml, 'ResultStatusMessage')
