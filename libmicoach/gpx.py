@@ -3,6 +3,7 @@ from dateutil.parser import parse
 import dateutil.tz
 import libmicoach.xmlassist as xa
 from lxml import etree
+from libmicoach.elevation import *
 
 def writeGpx(filename, content):
     """Convert miCoach xml to GPX format"""
@@ -50,7 +51,8 @@ def writeGpx(filename, content):
     #Setup basic Track	
     trk = etree.SubElement(gpx, 'trk')
     cmt = etree.SubElement(trk, 'cmt')
-    cmt.text = xa.search(xml, 'UserNote')
+    if xa.hasNode(xml, 'UserNote'):
+        cmt.text = xa.search(xml, 'UserNote')
 
     etree.SubElement(trk, 'src').text = 'Adidas miCoach' + u' \u00a9' 
     etree.SubElement(trk, 'link').set('href', 'https://micoach.adidas.com/us/Track/TrackWorkout?paramworkoutid='+xa.search(xml, 'CompletedWorkoutID')+'#Pace')
