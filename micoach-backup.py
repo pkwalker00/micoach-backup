@@ -340,7 +340,11 @@ class BackupWindow(Gtk.Window):
             year = workout["date"][:4]
             month = calendar.month_name[int(workout["date"][5:-3])]
             time = datetime.strptime(workout["time"], "%I:%M %p").strftime("%H:%M")
-            filename = workout["date"] + "T" + time  +"-" + workout["name"]
+            if "1/2" in workout["name"]:
+                workoutname = workout["name"].replace("1/2",  u"\u00BD")
+            else:
+                workoutname = workout["name"]
+            filename = workout["date"] + "T" + time  +"-" + workoutname
             workout_convert = self.user.schedule.getWorkout(workout["id"])
             self.update_progress(increment)
             yield True
