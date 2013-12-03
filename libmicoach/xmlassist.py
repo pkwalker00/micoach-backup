@@ -15,3 +15,15 @@ def findvalue(xmlroot, string):
     """Return text from value in text node"""
     node = xmlroot.find(findstring(xmlroot, string))
     return node.find(findstring(node, 'Value')).text
+
+def findhasvalue(xmlroot, string):
+    """Return text from HasValue"""
+    node = xmlroot.find(findstring(xmlroot, string))
+    return node.find(findstring(node,  'HasValue')).text
+
+def hasNode(xmlroot,  string):
+    """Return True if xml has node otherwise False"""
+    if xmlroot.find('.//{%s}%s' % (xmlroot.nsmap[None], string)) != None:
+        return True
+    else:
+        return False
