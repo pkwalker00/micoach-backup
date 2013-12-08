@@ -12,7 +12,7 @@ def writeTcx(filename, content):
 	
     utc = xa.search(xml, 'StartDateTimeUTC')
 
-    local = xa.search(xml, 'StartDateTime')
+    local = xa.search(xml, 'StartDateTime')[:19]
 
     #Set UTC start time for workout
     start = datetime.strptime(utc, "%Y-%m-%dT%H:%M:%S")	
