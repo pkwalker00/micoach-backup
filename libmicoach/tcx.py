@@ -39,10 +39,10 @@ def writeTcx(filename, content):
     activities = etree.SubElement(tcx, 'Activities')
     activity = etree.SubElement(activities, 'Activity')
     etree.SubElement(activity, 'Sport').text = xa.search(xml, 'ActivityType')
-    etree.SubElement(activity, 'Id').text = str(start)
+    etree.SubElement(activity, 'Id').text = start.strftime("%Y-%m-%dT%H:%M:%SZ")
 	
     lap = etree.SubElement(activity, 'Lap')
-    lap.set('StartTime', str(start))
+    lap.set('StartTime', start.strftime("%Y-%m-%dT%H:%M:%SZ"))
     etree.SubElement(lap, 'TotalTimeSeconds').text = xa.search(xml,'TotalTime')
     etree.SubElement(lap, 'DistanceMeters').text = xa.findvalue(xml, 'TotalDistance') 
     etree.SubElement(lap, 'Calories').text = xa.findvalue(xml, 'TotalCalories')
@@ -59,7 +59,7 @@ def writeTcx(filename, content):
     for point in xml.iter(xa.nodestring(xml, 'CompletedWorkoutDataPoint')):
         delta = timedelta(0, float(point.find(xa.findstring(xml, 'TimeFromStart')).text))
         trackpoint = etree.SubElement(track, 'Trackpoint')
-        etree.SubElement(trackpoint, 'Time').text  = (start + delta).isoformat()
+        etree.SubElement(trackpoint, 'Time').text  = (start + delta).strftime("%Y-%m-%dT%H:%M:%SZ")
         if gps_active == "true":			
             position = etree.SubElement(trackpoint, 'Position')
             etree.SubElement(position, 'LatitudeDegrees').text = point.find(xa.findstring(xml, 'Latitude')).text
