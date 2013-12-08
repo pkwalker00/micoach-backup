@@ -12,7 +12,7 @@ def writeTcx(filename, content):
 	
     utc = xa.search(xml, 'StartDateTimeUTC')
 
-    local = xa.search(xml, 'StartDateTime')
+    local = xa.search(xml, 'StartDateTime')[:19]
 
     #Set UTC start time for workout
     start = datetime.strptime(utc, "%Y-%m-%dT%H:%M:%S")	
@@ -25,6 +25,7 @@ def writeTcx(filename, content):
         start = start - timedelta(hours=1)
 
     gps_active = xa.search(xml, 'GPSActive')
+    footpod_present = xa.search(xml, 'FootPodPresent')
     hr_active = int(xa.findvalue(xml, 'AvgHR'))
 
     #create tcx container
@@ -38,10 +39,10 @@ def writeTcx(filename, content):
     activities = etree.SubElement(tcx, 'Activities')
     activity = etree.SubElement(activities, 'Activity')
     etree.SubElement(activity, 'Sport').text = xa.search(xml, 'ActivityType')
-    etree.SubElement(activity, 'Id').text = str(start)
+    etree.SubElement(activity, 'Id').text = start.strftime("%Y-%m-%dT%H:%M:%SZ")
 	
     lap = etree.SubElement(activity, 'Lap')
-    lap.set('StartTime', str(start))
+    lap.set('StartTime', start.strftime("%Y-%m-%dT%H:%M:%SZ"))
     etree.SubElement(lap, 'TotalTimeSeconds').text = xa.search(xml,'TotalTime')
     etree.SubElement(lap, 'DistanceMeters').text = xa.findvalue(xml, 'TotalDistance') 
     etree.SubElement(lap, 'Calories').text = xa.findvalue(xml, 'TotalCalories')
@@ -58,13 +59,16 @@ def writeTcx(filename, content):
     for point in xml.iter(xa.nodestring(xml, 'CompletedWorkoutDataPoint')):
         delta = timedelta(0, float(point.find(xa.findstring(xml, 'TimeFromStart')).text))
         trackpoint = etree.SubElement(track, 'Trackpoint')
-        etree.SubElement(trackpoint, 'Time').text  = (start + delta).isoformat()
+        etree.SubElement(trackpoint, 'Time').text  = (start + delta).strftime("%Y-%m-%dT%H:%M:%SZ")
         if gps_active == "true":			
             position = etree.SubElement(trackpoint, 'Position')
             etree.SubElement(position, 'LatitudeDegrees').text = point.find(xa.findstring(xml, 'Latitude')).text
             etree.SubElement(position, 'LongitudeDegrees').text = point.find(xa.findstring(xml, 'Longitude')).text
             etree.SubElement(trackpoint, 'AltitudeMeters').text = point.find(xa.findstring(xml, 'Altitude')).text
             etree.SubElement(trackpoint, 'DistanceMeters').text = point.find(xa.findstring(xml, 'Distance')).text
+        if footpod_present == "true":
+            etree.SubElement(trackpoint, 'DistanceMeters').text = point.find(xa.findstring(xml, 'Distance')).text
+            etree.SubElement(trackpoint, 'Cadence').text = point.find(xa.findstring(xml, 'StrideRate')).text
         if hr_active != 0:
             hrbpm = etree.SubElement(trackpoint, 'HeartRateBpm', attrib={'{'+xsi+'}type': 'HeartRateInBeatsPerMinute_t'})
             etree.SubElement(hrbpm, 'Value').text = point.find(xa.findstring(xml, 'HeartRate')).text
