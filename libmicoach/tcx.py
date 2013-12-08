@@ -25,6 +25,7 @@ def writeTcx(filename, content):
         start = start - timedelta(hours=1)
 
     gps_active = xa.search(xml, 'GPSActive')
+    footpod_present = xa.search(xml, 'FootPodPresent')
     hr_active = int(xa.findvalue(xml, 'AvgHR'))
 
     #create tcx container
@@ -65,6 +66,9 @@ def writeTcx(filename, content):
             etree.SubElement(position, 'LongitudeDegrees').text = point.find(xa.findstring(xml, 'Longitude')).text
             etree.SubElement(trackpoint, 'AltitudeMeters').text = point.find(xa.findstring(xml, 'Altitude')).text
             etree.SubElement(trackpoint, 'DistanceMeters').text = point.find(xa.findstring(xml, 'Distance')).text
+        if footpod_present == "true":
+            etree.SubElement(trackpoint, 'DistanceMeters').text = point.find(xa.findstring(xml, 'Distance')).text
+            etree.SubElement(trackpoint, 'Cadence').text = point.find(xa.findstring(xml, 'StrideRate')).text
         if hr_active != 0:
             hrbpm = etree.SubElement(trackpoint, 'HeartRateBpm', attrib={'{'+xsi+'}type': 'HeartRateInBeatsPerMinute_t'})
             etree.SubElement(hrbpm, 'Value').text = point.find(xa.findstring(xml, 'HeartRate')).text
