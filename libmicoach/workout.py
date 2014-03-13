@@ -1,59 +1,41 @@
-from datetime import datetime
-from lxml import etree
-import libmicoach.xmlassist as xa
-from libmicoach import gpx, tcx, elevation
+import requests, json
+from libmicoach import polyencode
+
 class Workout(object):
-    def __init__(self, content):
-        self.xml = elevation.findelevation(content)
-        self.id = xa.search(self.xml, 'CompletedWorkoutID')
-        self.date = datetime.strptime(xa.search(self.xml, 'StartDateTime'), '%Y-%m-%dT%H:%M:%S')
-        self.name = xa.search(self.xml, 'WorkoutName')
-
-    def writeXml(self, filename):
-        etree.ElementTree(self.xml).write(filename, xml_declaration=True, encoding='utf-8', pretty_print=True)
-
-    def writeTcx(self, filename):
-        tcx.writeTcx(filename, self.xml)
-
-    def writeGpx(self, filename):
-        gpx.writeGpx(filename, self.xml)
-
-class WorkoutList(object):
     
-    def __init__(self, data):
-        self.content = []
-        for w in data.iter(xa.nodestring(data, 'WorkoutLog')):
-            start = datetime.strptime(w.find(xa.findstring(data, 'StartDate')).text[:19], '%Y-%m-%dT%H:%M:%S')
-            end = datetime.strptime(w.find(xa.findstring(data, 'StopDate')).text[:19], '%Y-%m-%dT%H:%M:%S')
-            duration = end - start
+    def __init__(self, workoutId, cookies):
+        url = 'https://micoach.adidas.com/us/services/track/getChartWorkoutDetail?completedWorkoutId='
+        workout_request = requests.get(url + str(workoutId), cookies=cookies)
+        self.workout = json.loads(workout_request.text)['details']
+        del self.workout['WorkoutInfo']['GPSPathThumbnail']
+    
+    def elevation(self):
+        elevations = []
+        gpspoints = []
+        index = 0
+        for point in self.workout['CompletedWorkoutDataPoints']:
+            if len(gpspoints) == 0:
+                gpspoints.append([])
             
-            distance = int(w.find(xa.findstring(data, 'Distance')).find(xa.findstring(data, 'Value')).text)
-            id = int(w.find(xa.findstring(data, 'WorkoutId')).text)
-            name = w.find(xa.findstring(data, 'Name')).text
-            activity = w.find(xa.findstring(data, 'ActivityType')).text
-            type = w.find(xa.findstring(data, 'CompletedWorkoutType')).text
-            hr = int(w.find(xa.findstring(data, 'AvgHR')).find(xa.findstring(data, 'Value')).text)
-            pace = float(w.find(xa.findstring(data, 'AvgPace')).find(xa.findstring(data, 'Value')).text)
+            if len(gpspoints[index]) < 512:
+                gpspoints[index].append((point['Latitude'], point['Longitude']))
+            else:
+                gpspoints.append([])
+                index = index + 1
+                gpspoints[index].append((point['Latitude'], point['Longitude']))
             
-            self.content.append({'id':id, 
-                            'name': name, 
-                            'start': start, 
-                            'activity': activity, 
-                            'type': type, 
-                            'duration': duration, 
-                            'distance': distance, 
-                            'hr': hr, 
-                            'pace': pace})
-
-    def __len__(self):
-        return len(self.content)
-
-    def __iter__(self):
-        for line in self.content:
-            yield line
+        for group in gpspoints:
+            params = polyencode.encode_coords(group)
+        url = 'http://maps.googleapis.com/maps/api/elevation/xml?sensor=true&locations=enc:'+params
 
     def __repr__(self):
-        return 'WorkoutList: contains (%d) workouts' % (len(self.content))
+        return 'Workout ID: %s, Name: %s' % (self.workout['WorkoutInfo']['CompletedWorkoutID'],  self.workout['WorkoutInfo']['WorkoutName'])
 
-    def get_Content(self):
-        return self.content
+    def writeGpx(self):
+        pass
+    
+    def writeTcx(self):
+        pass
+    
+    def writeJson(self):
+        pass

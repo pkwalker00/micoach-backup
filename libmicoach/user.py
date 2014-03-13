@@ -1,42 +1,27 @@
-from libmicoach import services, schedule
-import libmicoach.xmlassist as xa
+from libmicoach.journal import *
 
 class miCoachUser(object):
     
-    def __init__(self, email=None, password=None):
-        self.logged_in = False
-        if email != None and password != None:
-            self.login(email, password)
+    def __init__(self):
+        self.url = 'https://micoach.adidas.com'
+        self.cookies = ''
+        self.loggedin = False
+    
+    def login(self, user_email, user_password):
+        url = 'https://micoach.adidas.com/us/services/login/loginuser'
+        creds = {'email':user_email,'password':user_password,'errors':{}}
+        login_request = requests.post(url, data=creds)
+        if login_request.status_code == 200:
+            authtoken = login_request.cookies['micoach_authtoken']
+            self.cookies=dict(micoach_authtoken=authtoken)
+            self.loggedin = True
+            self.journal = Journal(self.cookies)
 
-    def login(self, email, password):
-        try:
-            self.profile = services.UserProfile(email, password)
-            self.schedule = schedule.Schedule()
-            self.getProfile()
-            self.workouts = self.schedule.getWorkoutList()
-            self.logged_in = True
-        except:
-            pass
+    def refreshJournal(self):
+        self.journal = Journal(self.cookies)
 
-    def logout(self):
-        self.logged_in = False
-        services.logout()
-
-    def getProfile(self):
-        profile = self.profile.GetUserGeneralSettings()
-        self.screenname = xa.search(profile, 'ScreenName')
-        self.email = xa.search(profile, 'Email')
-        self.firstname = xa.search(profile, 'FirstName')
-        self.lastname = xa.search(profile, 'LastName')
-        self.unitofdistance = int(xa.search(profile, 'UserUnitOfDistancePreference'))
-        self.unitofweight = int(xa.search(profile, 'UserUnitOfWeightPreference'))
-        self.unitofheight = int(xa.search(profile, 'UserUnitOfHeightPreference'))
-        if int(xa.findvalue(profile, 'Gender')) == 1:
-            self.gender = 'Male'
-        else:
-            self.gender = 'Female'
-        self.country = xa.search(profile, 'CountryCode')
-
-    def getSchedule(self):
-        return self.schedule
-        
+    def getWorkout(self, workoutId):
+        return self.journal.getWorkout(workoutId)
+    
+    def getLatestWorkout(self):
+        return self.journal.getLatestWorkout()
