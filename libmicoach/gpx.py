@@ -1,18 +1,15 @@
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 import dateutil.tz
-import libmicoach.xmlassist as xa
 from lxml import etree
-from libmicoach.elevation import *
 
-def writeGpx(filename, content):
-    """Convert miCoach xml to GPX format"""
+def writeGpx(filename, workout):
+    """Convert miCoach json to GPX format"""
     
-    xml = content 
-    gps_active = xa.search(xml, 'GPSActive')
-    utc = xa.search(xml, 'StartDateTimeUTC')
+    gps_active = workout['WorkoutInfo']['GPSActive']
+    utc = workout['WorkoutInfo']['StartDateTimeUTC'][:-1]
 
-    local = xa.search(xml, 'StartDateTime')
+    local = workout['WorkoutInfo']['StartDateTime'][:-1]
 
     #Set UTC start time for workout
     start = datetime.strptime(utc, "%Y-%m-%dT%H:%M:%S")	
@@ -31,17 +28,17 @@ def writeGpx(filename, content):
 
     #Add metadata to gpx
     metadata = etree.SubElement(gpx, 'metadata')
-    etree.SubElement(metadata, 'name').text = xa.search(xml, 'WorkoutName')
+    etree.SubElement(metadata, 'name').text = workout['WorkoutInfo']['WorkoutName']
     etree.SubElement(metadata, 'time').text = str(start)
     
-    if gps_active == 'true':
+    if gps_active:
         bounds = etree.SubElement(metadata, 'bounds')
 
         lat = []
         lon = []
-        for point in xml.iter(xa.nodestring(xml, 'CompletedWorkoutDataPoint')):
-            lat.append(float(point.find(xa.findstring(xml, 'Latitude')).text))
-            lon.append(float(point.find(xa.findstring(xml, 'Longitude')).text))
+        for point in workout['CompletedWorkoutDataPoints']:
+            lat.append(point['Latitude'])
+            lon.append(point['Longitude'])
 
         bounds.set("minlat", str(min(lat)))
         bounds.set("minlon", str(min(lon)))
@@ -51,25 +48,28 @@ def writeGpx(filename, content):
     #Setup basic Track	
     trk = etree.SubElement(gpx, 'trk')
     cmt = etree.SubElement(trk, 'cmt')
-    if xa.hasNode(xml, 'UserNote'):
-        cmt.text = xa.search(xml, 'UserNote')
+    if 'UserNote' in workout['WorkoutInfo']:
+        cmt.text = workout['WorkoutInfo']['UserNote']
 
     etree.SubElement(trk, 'src').text = 'Adidas miCoach' + u' \u00a9' 
-    etree.SubElement(trk, 'link').set('href', 'https://micoach.adidas.com/us/Track/TrackWorkout?paramworkoutid='+xa.search(xml, 'CompletedWorkoutID')+'#Pace')
-    etree.SubElement(trk, 'type').text = xa.search(xml,'ActivityType')
+    etree.SubElement(trk, 'link').set('href', 'https://micoach.adidas.com/us/Track/TrackWorkout?paramworkoutid='+str(workout['WorkoutInfo']['CompletedWorkoutID'])+'#Pace')
+    #Need to find other activity type codes
+    if workout['WorkoutInfo']['ActivityType'] == 1:
+        activity = 'Running'
+    etree.SubElement(trk, 'type').text = activity
 
     #add track points from from source
     trkseg = etree.SubElement(trk, 'trkseg')
     
     #Add GPS data points
     
-    for point in xml.iter(xa.nodestring(xml, 'CompletedWorkoutDataPoint')):
-        delta = timedelta(0, float(point.find(xa.findstring(xml, 'TimeFromStart')).text))
+    for point in workout['CompletedWorkoutDataPoints']:
+        delta = timedelta(0, point['TimeFromStart'])
         trkpt = etree.SubElement(trkseg, 'trkpt')
-        if gps_active == 'true':
-            trkpt.set('lat', point.find(xa.findstring(xml, 'Latitude')).text)
-            trkpt.set('lon', point.find(xa.findstring(xml, 'Longitude')).text)
-            etree.SubElement(trkpt, 'ele').text = point.find(xa.findstring(xml, 'Altitude')).text
+        if gps_active:
+            trkpt.set('lat', str(point['Latitude']))
+            trkpt.set('lon', str(point['Longitude']))
+            etree.SubElement(trkpt, 'ele').text = str(point['Altitude'])
         etree.SubElement(trkpt, 'time').text = (start + delta).isoformat()
     
     #write completed xml to file
