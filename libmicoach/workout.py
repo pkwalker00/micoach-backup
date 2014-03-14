@@ -48,4 +48,4 @@ class Workout(object):
     
     def writeJson(self, filename):
         with open(filename, 'w') as workout:
-            workout.write(json.dumps(w.workout, sort_keys=True, indent=4))
+            workout.write(json.dumps(self.workout, sort_keys=True, indent=4))
