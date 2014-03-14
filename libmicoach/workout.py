@@ -1,5 +1,5 @@
 import requests, json
-from libmicoach import polyencode
+from libmicoach import polyencode, gpx
 
 class Workout(object):
     
@@ -8,14 +8,13 @@ class Workout(object):
         workout_request = requests.get(url + str(workoutId), cookies=cookies)
         self.workout = json.loads(workout_request.text)['details']
         del self.workout['WorkoutInfo']['GPSPathThumbnail']
+        self.updateElevations()
     
-    def elevation(self):
+    def updateElevations(self):
         elevations = []
-        gpspoints = []
+        gpspoints = [[]]
         index = 0
         for point in self.workout['CompletedWorkoutDataPoints']:
-            if len(gpspoints) == 0:
-                gpspoints.append([])
             
             if len(gpspoints[index]) < 512:
                 gpspoints[index].append((point['Latitude'], point['Longitude']))
@@ -26,13 +25,23 @@ class Workout(object):
             
         for group in gpspoints:
             params = polyencode.encode_coords(group)
-        url = 'http://maps.googleapis.com/maps/api/elevation/xml?sensor=true&locations=enc:'+params
+            url = 'http://maps.googleapis.com/maps/api/elevation/json?sensor=true&locations=enc:'+params
+            elevation_request = requests.get(url)
+            response = json.loads(elevation_request.text)['results']
+            for result in response:
+                elevations.append(result['elevation'])
+            
+        index = 0
+        for point in self.workout['CompletedWorkoutDataPoints']:
+            point['Altitude'] = elevations[index]
+            index = index + 1
+
 
     def __repr__(self):
         return 'Workout ID: %s, Name: %s' % (self.workout['WorkoutInfo']['CompletedWorkoutID'],  self.workout['WorkoutInfo']['WorkoutName'])
 
-    def writeGpx(self):
-        pass
+    def writeGpx(self, filename):
+        gpx.writeGpx(filename, self.workout)
     
     def writeTcx(self):
         pass
