@@ -46,5 +46,6 @@ class Workout(object):
     def writeTcx(self):
         pass
     
-    def writeJson(self):
-        pass
+    def writeJson(self, filename):
+        with open(filename, 'w') as workout:
+            workout.write(json.dumps(w.workout, sort_keys=True, indent=4))
