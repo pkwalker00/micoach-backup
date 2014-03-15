@@ -5,12 +5,15 @@ from lxml import etree
 
 def writeGpx(filename, workout):
     """Convert miCoach json to GPX format"""
+    
+    #Find what sensors were used
     if 'GPSActive' in workout['WorkoutInfo']:
         gps_active = workout['WorkoutInfo']['GPSActive']
     else:
         gps_active = False
     hrm_active = 'Value' in workout['WorkoutInfo']['AvgHR']
     footpod_active = 'Value' in workout['WorkoutInfo']['AvgStrideRate']
+    
     utc = workout['WorkoutInfo']['StartDateTimeUTC'][:-1]
 
     local = workout['WorkoutInfo']['StartDateTime'][:-1]
@@ -84,7 +87,7 @@ def writeGpx(filename, workout):
             trkpt.set('lat', str(point['Latitude']))
             trkpt.set('lon', str(point['Longitude']))
             etree.SubElement(trkpt, 'ele').text = str(point['Altitude'])
-        etree.SubElement(trkpt, 'time').text = (start + delta).isoformat()
+        etree.SubElement(trkpt, 'time').text = (start + delta).strftime("%Y-%m-%dT%H:%M:%SZ")
         if hrm_active or footpod_active:
             extensions = etree.SubElement(trkpt, 'extensions')
         if hrm_active:
