@@ -5,8 +5,12 @@ from lxml import etree
 
 def writeGpx(filename, workout):
     """Convert miCoach json to GPX format"""
-    
-    gps_active = workout['WorkoutInfo']['GPSActive']
+    if 'GPSActive' in workout['WorkoutInfo']:
+        gps_active = workout['WorkoutInfo']['GPSActive']
+    else:
+        gps_active = False
+    hrm_active = 'Value' in workout['WorkoutInfo']['AvgHR']
+    footpod_active = 'Value' in workout['WorkoutInfo']['AvgStrideRate']
     utc = workout['WorkoutInfo']['StartDateTimeUTC'][:-1]
 
     local = workout['WorkoutInfo']['StartDateTime'][:-1]
@@ -53,9 +57,19 @@ def writeGpx(filename, workout):
 
     etree.SubElement(trk, 'src').text = 'Adidas miCoach' + u' \u00a9' 
     etree.SubElement(trk, 'link').set('href', 'https://micoach.adidas.com/us/Track/TrackWorkout?paramworkoutid='+str(workout['WorkoutInfo']['CompletedWorkoutID'])+'#Pace')
-    #Need to find other activity type codes
-    if workout['WorkoutInfo']['ActivityType'] == 1:
+
+    #Determine ActivityType from code
+    activityType = workout['WorkoutInfo']['ActivityType']
+    if activityType == 1:
         activity = 'Running'
+    if activityType == 2:
+        activity = 'Walking'
+    if activityType == 3:
+        activity = 'Cycling'
+    if activityType == 14:
+        activity = 'Nordic Skiing'
+    if activityType == 999:
+        activity = 'Other'
     etree.SubElement(trk, 'type').text = activity
 
     #add track points from from source
@@ -71,6 +85,12 @@ def writeGpx(filename, workout):
             trkpt.set('lon', str(point['Longitude']))
             etree.SubElement(trkpt, 'ele').text = str(point['Altitude'])
         etree.SubElement(trkpt, 'time').text = (start + delta).isoformat()
+        if hrm_active or footpod_active:
+            extensions = etree.SubElement(trkpt, 'extensions')
+        if hrm_active:
+            etree.SubElement(extensions, 'heartrate').text = str(point['HeartRate'])
+        if footpod_active:
+            etree.SubElement(extensions, 'cadence').text = str(point['StrideRate'])
     
     #write completed xml to file
     etree.ElementTree(gpx).write(filename, xml_declaration=True, encoding='utf-8', pretty_print=True)
