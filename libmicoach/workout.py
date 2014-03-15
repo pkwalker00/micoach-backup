@@ -1,5 +1,5 @@
 import requests, json
-from libmicoach import polyencode, gpx
+from libmicoach import polyencode, gpx, tcx
 
 class Workout(object):
     
@@ -7,7 +7,8 @@ class Workout(object):
         url = 'https://micoach.adidas.com/us/services/track/getChartWorkoutDetail?completedWorkoutId='
         workout_request = requests.get(url + str(workoutId), cookies=cookies)
         self.workout = json.loads(workout_request.text)['details']
-        del self.workout['WorkoutInfo']['GPSPathThumbnail']
+        if 'GPSPathThumbnail' in self.workout['WorkoutInfo']:
+            del self.workout['WorkoutInfo']['GPSPathThumbnail']
         self.updateElevations()
     
     def updateElevations(self):
@@ -43,8 +44,8 @@ class Workout(object):
     def writeGpx(self, filename):
         gpx.writeGpx(filename, self.workout)
     
-    def writeTcx(self):
-        pass
+    def writeTcx(self, filename):
+        tcx.writeTcx(filename, self.workout)
     
     def writeJson(self, filename):
         with open(filename, 'w') as workout:
