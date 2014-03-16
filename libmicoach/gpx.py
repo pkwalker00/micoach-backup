@@ -54,6 +54,7 @@ def writeGpx(filename, workout):
     
     #Setup basic Track	
     trk = etree.SubElement(gpx, 'trk')
+    etree.SubElement(trk, 'name').text = workout['WorkoutInfo']['WorkoutName']
     cmt = etree.SubElement(trk, 'cmt')
     if 'UserNote' in workout['WorkoutInfo']:
         cmt.text = workout['WorkoutInfo']['UserNote']
