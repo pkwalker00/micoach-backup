@@ -50,8 +50,8 @@ def writeTcx(filename, workout):
     tcx = etree.Element('TrainingCenterDatabase', nsmap=NSMAP) 
 
     activities = etree.SubElement(tcx, 'Activities')
-    activity = etree.SubElement(activities, 'Activity')
-    etree.SubElement(activity, 'Sport').text = workoutActivity
+    activity = etree.SubElement(activities, 'Activity',  Sport=workoutActivity)
+    etree.SubElement(activity, 'WorkoutName').text = workout['WorkoutInfo']['WorkoutName']
     etree.SubElement(activity, 'Id').text = str(start)
 
     lap = etree.SubElement(activity, 'Lap')
