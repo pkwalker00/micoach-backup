@@ -3,14 +3,18 @@ from libmicoach import polyencode, gpx, tcx
 
 class Workout(object):
     
-    def __init__(self, workoutId, cookies):
+    def __init__(self, workoutId, journalItem, cookies):
         url = 'https://micoach.adidas.com/us/services/track/getChartWorkoutDetail?completedWorkoutId='
         workout_request = requests.get(url + str(workoutId), cookies=cookies)
         self.workout = json.loads(workout_request.text)['details']
         if 'GPSPathThumbnail' in self.workout['WorkoutInfo']:
             del self.workout['WorkoutInfo']['GPSPathThumbnail']
         self.updateElevations()
+        self.journalItem = journalItem
     
+    def __repr__(self):
+        return 'Workout ID: %s, Name: %s' % (self.workout['WorkoutInfo']['CompletedWorkoutID'],  self.workout['WorkoutInfo']['WorkoutName'])
+
     def updateElevations(self):
         elevations = []
         gpspoints = [[]]
@@ -36,10 +40,6 @@ class Workout(object):
         for point in self.workout['CompletedWorkoutDataPoints']:
             point['Altitude'] = elevations[index]
             index = index + 1
-
-
-    def __repr__(self):
-        return 'Workout ID: %s, Name: %s' % (self.workout['WorkoutInfo']['CompletedWorkoutID'],  self.workout['WorkoutInfo']['WorkoutName'])
 
     def writeGpx(self, filename):
         gpx.writeGpx(filename, self.workout)

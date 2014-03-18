@@ -21,8 +21,13 @@ class Journal(object):
     def __repr__(self):
         return 'Journal: contains (%d) workouts' % (len(self.list))
 
+    def getJournalItem(self, workoutId):
+        for i in range(0, len(self.list)):
+            if self.list[i]['workoutId'] == workoutId:
+                return self.list[i]
+    
     def getWorkout(self, workoutId):
-        return Workout(workoutId, self.cookies)
+        return Workout(workoutId, self.getJournalItem(workoutId), self.cookies)
     
     def getLatestWorkout(self):
         return self.getWorkout(self.list[-1]['workoutId'])

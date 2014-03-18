@@ -17,7 +17,6 @@ class miCoachUser(object):
             return 'Logged in as %s' % (self.username)
     
     def login(self, user_email, user_password):
-        print('Logging In...')
         url = 'https://micoach.adidas.com/us/services/login/loginuser'
         creds = {'email':user_email,'password':user_password,'errors':{}}
         login_request = requests.post(url, data=creds)
