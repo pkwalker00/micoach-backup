@@ -29,9 +29,10 @@ def writeGpx(filename, workout):
         start = start - timedelta(hours=1)
     
     #create gpx container
-    gpx = etree.Element('gpx', version='1.1')
-    gpx.set("creator","micoach-backup")
-    gpx.set("schemaLocation","http://www.topografix.com/GPX/1/1/")
+    xmlns = 'http://www.topografix.com/GPX/1/1'
+    gpxtpx = 'http://www.garmin.com/xmlschemas/TrackPointExtension/v1'
+    NSMAP = {None: xmlns, 'gpxtpx': gpxtpx}
+    gpx = etree.Element('gpx', creator='micoach-backup', version='1.1', nsmap=NSMAP)
 
     #Add metadata to gpx
     metadata = etree.SubElement(gpx, 'metadata')
@@ -91,12 +92,13 @@ def writeGpx(filename, workout):
         etree.SubElement(trkpt, 'time').text = (start + delta).strftime("%Y-%m-%dT%H:%M:%SZ")
         if hrm_active or footpod_active:
             extensions = etree.SubElement(trkpt, 'extensions')
-            gpxtpx = etree.SubElement(extensions, '{gpxtpx}TrackPointExtension')
+            gpxtpx = etree.SubElement(extensions, '{%s}TrackPointExtension' % NSMAP['gpxtpx'], nsmap=NSMAP)
         if hrm_active:
             etree.SubElement(extensions, 'heartrate').text = str(point['HeartRate'])
-            etree.SubElement(gpxtpx, '{gpxtpx}hr').text = str(point['HeartRate'])
+            etree.SubElement(gpxtpx, '{%s}hr' % NSMAP['gpxtpx'], nsmap = NSMAP).text = str(point['HeartRate'])
         if footpod_active:
             etree.SubElement(extensions, 'cadence').text = str(point['StrideRate'])
+            etree.SubElement(gpxtpx, '{%s}cad' % NSMAP['gpxtpx'], nsmap = NSMAP).text = str(point['StrideRate'])
     
     #write completed xml to file
     etree.ElementTree(gpx).write(filename, xml_declaration=True, encoding='utf-8', pretty_print=True)
