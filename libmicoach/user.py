@@ -1,5 +1,6 @@
 from libmicoach.journal import *
 from bs4 import BeautifulSoup
+import threading
 
 class miCoachUser(object):
     
@@ -24,11 +25,8 @@ class miCoachUser(object):
             authtoken = login_request.cookies['micoach_authtoken']
             self.cookies=dict(micoach_authtoken=authtoken)
             self.loggedin = True
-            print('Retrieving Journal...')
-            self.journal = Journal(self.cookies)
-            print('Retrieving Username...')
+            threading.Thread(target = self.getJournal).start()
             self.getUserID()
-            print('Login Successful')
     
     def logout(self):
         self.cookies = ''
@@ -37,12 +35,12 @@ class miCoachUser(object):
         self.journal =''
     
     def getUserID(self):
-        url = 'http://community-micoach.adidas.com/index.jspa'
+        url = 'https://micoach.adidas.com/us/UI/Settings/General.aspx'
         request = requests.get(url, cookies=self.cookies)
         html = BeautifulSoup(request.text)
         self.username = html.find_all(id='loggedAsUserName')[0].text
 
-    def refreshJournal(self):
+    def getJournal(self):
         self.journal = Journal(self.cookies)
 
     def getWorkout(self, workoutId):
