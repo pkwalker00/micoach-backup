@@ -57,7 +57,8 @@ def writeTcx(filename, workout):
     lap = etree.SubElement(activity, 'Lap')
     lap.set('StartTime', str(start))
     etree.SubElement(lap, 'TotalTimeSeconds').text = str(workout['WorkoutInfo']['TotalTime'])
-    etree.SubElement(lap, 'DistanceMeters').text = str(workout['WorkoutInfo']['TotalDistance']['Value'] )
+    if 'Value' in workout['WorkoutInfo']['TotalDistance']:
+        etree.SubElement(lap, 'DistanceMeters').text = str(workout['WorkoutInfo']['TotalDistance']['Value'])
     etree.SubElement(lap, 'Calories').text = str(workout['WorkoutInfo']['TotalCalories']['Value'])
     
     if hrm_active:
