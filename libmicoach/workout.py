@@ -9,7 +9,8 @@ class Workout(object):
         self.workout = json.loads(workout_request.text)['details']
         if 'GPSPathThumbnail' in self.workout['WorkoutInfo']:
             del self.workout['WorkoutInfo']['GPSPathThumbnail']
-        self.updateElevations()
+        if 'GPSActive' in workout['WorkoutInfo']:
+            self.updateElevations()
         self.journalItem = journalItem
     
     def __repr__(self):
