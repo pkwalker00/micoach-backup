@@ -6,7 +6,7 @@ class Workout(object):
     def __init__(self, workoutId, journalItem, cookies):
         url = 'https://micoach.adidas.com/us/services/track/getChartWorkoutDetail?completedWorkoutId='
         self.workout_request = requests.get(url + str(workoutId), cookies=cookies)
-        self.workout = workout_request.json['details']
+        self.workout = self.workout_request.json['details']
         if 'GPSPathThumbnail' in self.workout['WorkoutInfo']:
             del self.workout['WorkoutInfo']['GPSPathThumbnail']
         if 'GPSActive' in self.workout['WorkoutInfo']:
