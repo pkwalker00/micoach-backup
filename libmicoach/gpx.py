@@ -97,7 +97,7 @@ def writeGpx(filename, workout):
             extensions = etree.SubElement(trkpt, 'extensions')
             gpxtpx = etree.SubElement(extensions, '{%s}TrackPointExtension' % NSMAP['gpxtpx'], nsmap=NSMAP)
         if hrm_active:
-            etree.SubElement(extensions, 'heartrate').text = str(point['HeartRate'])
+            #etree.SubElement(extensions, 'heartrate').text = str(point['HeartRate'])
             etree.SubElement(gpxtpx, '{%s}hr' % NSMAP['gpxtpx'], nsmap = NSMAP).text = str(point['HeartRate'])
         if footpod_active:
             etree.SubElement(extensions, 'cadence').text = str(point['StrideRate'])
