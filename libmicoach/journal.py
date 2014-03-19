@@ -1,4 +1,4 @@
-import requests,  json
+import requests
 from libmicoach.workout import *
 
 class Journal(object):
@@ -9,7 +9,7 @@ class Journal(object):
         journal_sort = {"page":1,"start":0,"limit":3000,"sort":[{"property":"startDateTime","direction":"desc"}]}
         journal_request = requests.post(url, data = journal_sort, cookies=self.cookies)
         if journal_request.status_code == 200:
-            self.list = json.loads(journal_request.text)['items']
+            self.list = journal_request.json()['items']
     
     def __len__(self):
         return len(self.list)
