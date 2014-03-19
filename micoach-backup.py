@@ -1,414 +1,112 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-from gi.repository import Gtk, GObject
-from libmicoach.user import *
-from math import floor
-from datetime import datetime
-import configparser, os,  calendar
+# Form implementation generated from reading ui file 'micoach.ui'
+#
+# Created: Tue Mar 18 20:03:57 2014
+#      by: PyQt4 UI code generator 4.10.3
+#
+# WARNING! All changes made in this file will be lost!
 
-class BackupWindow(Gtk.Window):
-    def __init__(self):
-        Gtk.Window.__init__(self, title = "Adidas miCoach" + u" \u00a9" + " Backup")
-        self.connect("delete_event", Gtk.main_quit)
-        self.set_border_width(10)
-        self.set_default_size(1200, 600)
-        icon = Gtk.IconTheme.get_default().load_icon("gtk-harddisk", 64, 0)
-        self.set_icon(icon)
-    
-        self.config = configparser.ConfigParser()
-        self.backup_config = os.path.expanduser("~")+"/miCoach/backup.cfg"
-        if not os.path.exists(os.path.expanduser("~")+"/miCoach/"):
-                    try:
-                        os.makedirs(os.path.expanduser("~")+"/miCoach/")
-                    except: 
-                        pass
-        try:
-            with open(self.backup_config): pass
-        except IOError:
-            self.config['General']  = {}
-            self.save_config()
-        
-        self.config.read(self.backup_config)        
-        self.user = miCoachUser()
-        
-        self.xml = self.config["General"].getboolean("xml", False)
-        self.tcx = self.config["General"].getboolean("tcx",  True)
-        self.gpx = self.config["General"].getboolean("gpx",  True)
-        self.folder = self.config["General"].get("folder",  os.path.expanduser("~") +"/miCoach")
-        
-        self.to_convert = []
-        
-        self.grid = Gtk.Grid()
-        self.add(self.grid)
-        
-        self.create_login_bar()
-        self.create_backup_options()
-        self.create_progress_bar()
-        self.create_workout_list()
-        self.option_enable_toggle()
-        self.show_all()
+from PyQt4 import QtCore, QtGui
 
-    def create_backup_options(self):
-        box = Gtk.Box()
-        
-        label_convert = Gtk.Label("Backup Formats & Location:")
-        
-        self.button_xml = Gtk.ToggleButton(label = "XML")
-        self.button_xml.set_active(self.xml)
-        self.button_xml.connect("toggled", self.on_xml_toggled)
-        self.button_xml.set_tooltip_text("Save raw xml sent from miCoach")
-        
-        self.button_gpx = Gtk.ToggleButton(label = "GPX")
-        self.button_gpx.set_active(self.gpx)
-        self.button_gpx.connect("toggled", self.on_gpx_toggled)
-        self.button_gpx.set_tooltip_text("Creates the smallest file. Ideal for GPS only workouts")
-        
-        self.button_tcx = Gtk.ToggleButton(label = "TCX")
-        self.button_tcx.set_active(self.tcx)
-        self.button_tcx.connect("toggled", self.on_tcx_toggled)
-        self.button_tcx.set_tooltip_text("Use this if your workout has Heart Rate info")
-        
-        self.button_files = Gtk.Button(label = None, image = Gtk.Image(stock = Gtk.STOCK_OPEN))
-        self.button_files.connect("clicked", self.on_files_clicked)
-        self.button_files.set_tooltip_text("Change the default folder to save workout data")
-        
-        box.pack_start(label_convert, True, True, 0)
-        box.pack_start(self.button_xml, True, True, 5)
-        box.pack_start(self.button_gpx, True, True, 5)
-        box.pack_start(self.button_tcx, True, True, 5)
-        box.pack_start(self.button_files, True, True, 5)
-        
-        self.grid.attach(box, 1, 0, 1, 1)
-        
-        box2 = Gtk.Box()
-        self.button_backup = Gtk.Button("  Backup  ")
-        self.button_backup.connect("clicked", self.on_backup_clicked)
-        box2.pack_start(self.button_backup, True, True, 5)
-        box2.set_hexpand(True)
-        self.button_backup.set_sensitive(False)
-        self.grid.attach(box2, 2, 0, 1, 1)
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
 
-    def create_login_bar(self):
-        box = Gtk.Box()
-        
-        label_email = Gtk.Label("E-mail:")
-        self.entry_email = Gtk.Entry()
-        label_pass = Gtk.Label("Password:")
-        self.entry_pass = Gtk.Entry(visibility = False)
-        self.button_login = Gtk.Button("  Login  ")
-        self.button_login.connect("clicked", self.on_login_clicked)
-        
-        box.pack_start(label_email, True, True, 0)
-        box.pack_start(self.entry_email, True, True, 5)
-        box.pack_start(label_pass, True, True, 0)
-        box.pack_start(self.entry_pass, True, True, 5)
-        box.pack_start(self.button_login, True, True, 5)
-        self.grid.attach(box, 0, 0, 1, 1)
-    
-    def create_workout_list(self):
-        box = Gtk.Box()
-        scrollbox = Gtk.ScrolledWindow()
-        scrollbox.set_vexpand(True)
-        scrollbox.set_hexpand(True)
-        box.pack_start(scrollbox, True, True, 5)
-        
-        self.listmodel = Gtk.ListStore(bool, int, str, str, str, str, str, str, str, str, str, str)
-        self.view = Gtk.TreeView(model = self.listmodel)
-        self.button_checkall = Gtk.CheckButton()
-        self.button_checkall.show()
-        columns = ['Workout ID', 'Name', 'Date', 'Time', 'Activity', 'Type', 'Duration', 'Distance', 'Pace', 'Heart Rate']
-        toggle_cell = Gtk.CellRendererToggle()
-        toggle_cell.connect("toggled", self.on_cell_toggled)
-        column_toggle = Gtk.TreeViewColumn(None, toggle_cell, active=0)
-        column_toggle.set_widget(self.button_checkall)
-        column_toggle.set_clickable(True)
-        column_toggle.connect("clicked", self.on_column_clicked)
-        self.view.append_column(column_toggle)
-        for item in columns:
-            cell = Gtk.CellRendererText()
-            col = Gtk.TreeViewColumn(item, cell, text = columns.index(item)+1, background=11)
-            self.view.append_column(col)
-        
-        scrollbox.add(self.view)
-        box.set_vexpand(True)
-        #box.set_hexpand(True)
-        self.grid.attach(box, 0, 1, 10, 1)
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
-    def create_progress_bar(self):
-        box = Gtk.Box()
-        self.progressbar = Gtk.ProgressBar()
-        box.pack_start(self.progressbar, True, True, 5)
-        self.progressbar.set_hexpand(True)
-        self.button_cancel = Gtk.Button("Cancel")
-        self.button_cancel.connect("clicked",  self.on_cancel_clicked)
-        self.button_cancel.set_sensitive(False)
-        box.pack_start(self.button_cancel, False, True, 5)
-        self.grid.attach(box, 0, 2, 10, 1)
+class Ui_Form(object):
+    def setupUi(self, Form):
+        Form.setObjectName(_fromUtf8("Form"))
+        Form.resize(970, 458)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("folder"))
+        Form.setWindowIcon(icon)
+        self.gridLayout = QtGui.QGridLayout(Form)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.splitter = QtGui.QSplitter(Form)
+        self.splitter.setOrientation(QtCore.Qt.Horizontal)
+        self.splitter.setObjectName(_fromUtf8("splitter"))
+        self.emailEdit = QtGui.QLineEdit(self.splitter)
+        self.emailEdit.setObjectName(_fromUtf8("emailEdit"))
+        self.passwordEdit = QtGui.QLineEdit(self.splitter)
+        self.passwordEdit.setEchoMode(QtGui.QLineEdit.Password)
+        self.passwordEdit.setObjectName(_fromUtf8("passwordEdit"))
+        self.loginButton = QtGui.QPushButton(self.splitter)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.loginButton.sizePolicy().hasHeightForWidth())
+        self.loginButton.setSizePolicy(sizePolicy)
+        self.loginButton.setObjectName(_fromUtf8("loginButton"))
+        self.jsonButton = QtGui.QToolButton(self.splitter)
+        self.jsonButton.setCheckable(True)
+        self.jsonButton.setObjectName(_fromUtf8("jsonButton"))
+        self.gpxButton = QtGui.QToolButton(self.splitter)
+        self.gpxButton.setCheckable(True)
+        self.gpxButton.setObjectName(_fromUtf8("gpxButton"))
+        self.tcxButton = QtGui.QToolButton(self.splitter)
+        self.tcxButton.setCheckable(True)
+        self.tcxButton.setObjectName(_fromUtf8("tcxButton"))
+        self.fileButton = QtGui.QToolButton(self.splitter)
+        self.fileButton.setText(_fromUtf8(""))
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("folder"))
+        self.fileButton.setIcon(icon)
+        self.fileButton.setObjectName(_fromUtf8("fileButton"))
+        self.backupButton = QtGui.QPushButton(self.splitter)
+        self.backupButton.setEnabled(False)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.backupButton.sizePolicy().hasHeightForWidth())
+        self.backupButton.setSizePolicy(sizePolicy)
+        self.backupButton.setObjectName(_fromUtf8("backupButton"))
+        self.gridLayout.addWidget(self.splitter, 0, 0, 1, 2)
+        self.listView = QtGui.QListView(Form)
+        self.listView.setObjectName(_fromUtf8("listView"))
+        self.gridLayout.addWidget(self.listView, 1, 0, 1, 2)
+        self.progressBar = QtGui.QProgressBar(Form)
+        self.progressBar.setProperty("value", 24)
+        self.progressBar.setObjectName(_fromUtf8("progressBar"))
+        self.gridLayout.addWidget(self.progressBar, 2, 0, 1, 1)
+        self.cancelButton = QtGui.QPushButton(Form)
+        self.cancelButton.setEnabled(False)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.cancelButton.sizePolicy().hasHeightForWidth())
+        self.cancelButton.setSizePolicy(sizePolicy)
+        self.cancelButton.setObjectName(_fromUtf8("cancelButton"))
+        self.gridLayout.addWidget(self.cancelButton, 2, 1, 1, 1)
 
-    def on_files_clicked(self, button):
-        dialog = Gtk.FileChooserDialog("Choose a folder", self, Gtk.FileChooserAction.SELECT_FOLDER, 
-                                                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Select", Gtk.ResponseType.OK))
-        dialog.set_default_size(800, 400)
-        response = dialog.run()
-        if response == Gtk.ResponseType.OK:
-            self.folder = dialog.get_filename()
-            self.config.set("General", "folder", self.folder)
-            self.save_config()
-            print(self.folder)
-        
-        dialog.destroy()
+        self.retranslateUi(Form)
+        QtCore.QMetaObject.connectSlotsByName(Form)
 
-    def on_backup_clicked(self, button):
-        if len(self.to_convert) == 0:
-            dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.WARNING, Gtk.ButtonsType.OK, "No workout selected")
-            dialog.format_secondary_text("You must have at least one workout selected.")
-            dialog.run()
-            dialog.destroy()
-            return
-        self.button_cancel.set_sensitive(True)
-        increment = self.find_progress_increment()
-        self.backup = self.backup_workouts(self.to_convert, increment)
-        self.id = GObject.idle_add(self.backup.__next__)
+    def retranslateUi(self, Form):
+        Form.setWindowTitle(_translate("Form", "micoach-backup", None))
+        self.emailEdit.setPlaceholderText(_translate("Form", "email", None))
+        self.passwordEdit.setPlaceholderText(_translate("Form", "password", None))
+        self.loginButton.setText(_translate("Form", "Login", None))
+        self.jsonButton.setText(_translate("Form", "JSON", None))
+        self.gpxButton.setText(_translate("Form", "GPX", None))
+        self.tcxButton.setText(_translate("Form", "TCX", None))
+        self.backupButton.setText(_translate("Form", "Backup", None))
+        self.cancelButton.setText(_translate("Form", "Cancel", None))
 
-    def on_login_clicked(self, button):
-        if not self.user.logged_in:
-            email = self.entry_email.get_text()
-            password = self.entry_pass.get_text()
-            if email == "" or password == "":
-                dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.WARNING, Gtk.ButtonsType.OK, "Missing Credentials")
-                dialog.format_secondary_text("You must enter both your e-mail and password")
-                dialog.run()
-                dialog.destroy()
-                return
-            self.user.login(email, password)
-            if self.user.logged_in:
-                self.button_backup.set_sensitive(True)
-                self.entry_email.set_sensitive(False)
-                self.entry_pass.set_sensitive(False)
-                button.set_label("  Logout  ")
-                self.option_enable_toggle()
-                self.populate_workouts()
-            else:
-                dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.WARNING, Gtk.ButtonsType.OK, "Login Failed")
-                dialog.format_secondary_text("Did you type the correct e-mail and password?")
-                dialog.run()
-                dialog.destroy()
-        else:
-            self.user.logout()
-            self.user = miCoachUser()
-            self.entry_email.set_text("")
-            self.entry_email.set_sensitive(True)
-            self.entry_pass.set_text("")
-            self.entry_pass.set_sensitive(True)
-            button.set_label("  Login  ")
-            self.button_backup.set_sensitive(False)
-            self.option_enable_toggle()
-            self.listmodel.clear()
-    
-    def populate_workouts(self):
-        self.workout_list = self.prepare_content(self.user.workouts.get_Content())
-        for item in self.workout_list:
-                self.listmodel.append(item)
-        self.view = Gtk.TreeView(model = self.listmodel)
-    
-    def on_column_clicked(self, widget):
-        if self.user.logged_in:
-            if self.button_checkall.get_active():
-                path = 0
-                for item in self.listmodel:
-                    item[0] = True
-                    self.on_cell_toggled(item[0], path)
-                    path = path + 1
-                self.button_checkall.set_active(False)
-            else:
-                path = 0
-                for item in self.listmodel:
-                    item[0] = False
-                    self.on_cell_toggled(item[0], path)
-                    path = path + 1
-                self.button_checkall.set_active(True)
 
-    def on_cell_toggled(self, widget, path):
-        self.listmodel[path][0] = not self.listmodel[path][0]
-        if self.listmodel[path][0]:
-            self.to_convert.append({"id": str(self.listmodel[path][1]), "name": self.listmodel[path][2], 
-                                                    "date": self.listmodel[path][3], "time": self.listmodel[path][4]})
-        else:
-            self.to_convert = [x for x in self.to_convert if str(self.listmodel[path][1]) not in x["id"]]
-    
-    def on_xml_toggled(self, button):
-        if self.xml:
-            if not self.gpx and not self.tcx:
-                self.xml =  not self.xml
-                button.set_active(True)
-                self.choose_backup_dialog()
-                return
-        self.xml =  not self.xml
-        self.config.set("General", "xml", str(self.xml))
-        self.save_config()
-    
-    def on_gpx_toggled(self,  button):
-        if self.gpx:
-            if not self.xml and not self.tcx:
-                self.gpx =  not self.gpx
-                button.set_active(True)
-                self.choose_backup_dialog()
-                return
-        self.gpx = not self.gpx
-        self.config.set("General", "gpx", str(self.gpx))
-        self.save_config()
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    Form = QtGui.QWidget()
+    ui = Ui_Form()
+    ui.setupUi(Form)
+    Form.show()
+    sys.exit(app.exec_())
 
-    def on_tcx_toggled(self, button):
-        if self.tcx:
-            if not self.gpx and not self.xml:
-                self.tcx =  not self.tcx
-                button.set_active(True)
-                self.choose_backup_dialog()
-                return
-        self.tcx = not self.tcx
-        self.config.set("General", "tcx", str(self.tcx))
-        self.save_config()
-
-    def prepare_content(self, dict):
-        prepared_list = []
-        row_color = False
-        for item in dict:
-            new_item = []
-            new_item.append(False)
-            new_item.append(item['id'])
-            new_item.append(item['name'])
-            new_item.append(item['start'].strftime('%Y-%m-%d'))
-            new_item.append(item['start'].strftime('%I:%M %p'))
-            new_item.append(item['activity'])
-            new_item.append(item['type'])
-            new_item.append(str(item['duration']))
-            d = item['distance']
-            
-            mpk = item['pace']/60
-            if self.user.unitofdistance == 1:
-                if d > 1000:
-                    new_item.append('{0:.2f} km'.format(round(d/1000,2)))
-                else:
-                    new_item.append('{:d} m'.format(d))
-                min = floor(mpk)
-                sec = int((mpk-min)*60)
-                new_item.append('{:d}:{:02d} min/km'.format(min, sec))
-            else:
-                if d > 1610:
-                    new_item.append('{0:.2f} mi'.format(round(d/1609.34,2)))
-                else:
-                    new_item.append('{0:.2f} yd'.format(round(d*1.09361, 0)))
-                mpm = mpk * 1.609344
-                min = floor(mpm)
-                sec = int((mpm -  min) * 60)
-                new_item.append('{:d}:{:02d} min/mi'.format(min, sec))
-            new_item.append('{0:d}'.format(item['hr']))
-            prepared_list.append(new_item)
-            if row_color:
-                new_item.append("#DAF4F7")
-                row_color = not row_color
-            else:
-                new_item.append("#FFFFFF")
-                row_color = not row_color
-        return prepared_list
-    
-    def save_config(self):
-        with open(self.backup_config, "w") as configfile:
-            self.config.write(configfile)
-
-    def choose_backup_dialog(self):
-        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.WARNING, Gtk.ButtonsType.OK, "Invalid Selection")
-        dialog.format_secondary_text("You must have at least one backup option selected.")
-        dialog.run()
-        dialog.destroy()
-    
-    def find_progress_increment(self):
-        count = 0
-        for item in self.to_convert:
-            count = count + 1
-            if self.xml:
-                count = count + 1
-            if self.gpx:
-                count = count + 1
-            if self.tcx:
-                count = count + 1
-        
-        return 1/count
-
-    def backup_workouts(self, selection, increment):
-        for workout in selection:
-            year = workout["date"][:4]
-            month = calendar.month_name[int(workout["date"][5:-3])]
-            time = datetime.strptime(workout["time"], "%I:%M %p").strftime("%H:%M")
-            if "1/2" in workout["name"]:
-                workoutname = workout["name"].replace("1/2",  u"\u00BD")
-            else:
-                workoutname = workout["name"]
-            filename = workout["date"] + "T" + time  +"-" + workoutname
-            workout_convert = self.user.schedule.getWorkout(workout["id"])
-            self.update_progress(increment)
-            yield True
-            if self.xml:
-                save_to_folder = self.folder + "/"  + self.user.screenname + "/xml/" + year + "/" + workout["date"][5:-3]+"-"+ month
-                if not os.path.exists(save_to_folder):
-                    try:
-                        os.makedirs(save_to_folder)
-                    except:
-                        pass
-                workout_convert.writeXml(save_to_folder+"/"+filename+".xml")
-                self.update_progress(increment)
-                yield True
-            if self.gpx:
-                save_to_folder = self.folder + "/"  + self.user.screenname + "/gpx/" + year + "/" + workout["date"][5:-3]+"-"+ month
-                if not os.path.exists(save_to_folder):
-                    try:
-                        os.makedirs(save_to_folder)
-                    except:
-                        pass
-                workout_convert.writeGpx(save_to_folder+"/"+filename+".gpx")
-                self.update_progress(increment)
-                yield True
-            if self.tcx:
-                save_to_folder = self.folder + "/"  + self.user.screenname + "/tcx/" + year + "/" + workout["date"][5:-3]+"-"+ month
-                if not os.path.exists(save_to_folder):
-                    try:
-                        os.makedirs(save_to_folder)
-                    except:
-                        pass
-                workout_convert.writeTcx(save_to_folder+"/"+filename+".tcx")
-                self.update_progress(increment)
-                yield True
-
-        if self.button_checkall.get_active():
-            self.button_checkall.set_active(False)
-        path = 0
-        for item in self.listmodel:
-            item[0] = True
-            self.on_cell_toggled(item[0], path)
-            path = path + 1
-
-        GObject.source_remove(self.id)
-        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Backup Complete!")
-        dialog.format_secondary_text("Saved to: "+ self.folder+"/"+self.user.screenname+"/")
-        dialog.run()
-        dialog.destroy()
-        self.button_cancel.set_sensitive(False)
-        self.progressbar.set_fraction(0)
-        yield False
-    
-    def update_progress(self, increment):
-        self.progressbar.set_fraction(self.progressbar.get_fraction() + increment)
-    
-    def on_cancel_clicked(self, button):
-        GObject.source_remove(self.id)
-        self.progressbar.set_fraction(0)
-        button.set_sensitive(False)
-
-    def option_enable_toggle(self):
-        self.button_xml.set_sensitive(not self.button_xml.get_sensitive())
-        self.button_gpx.set_sensitive(not self.button_gpx.get_sensitive())
-        self.button_tcx.set_sensitive(not self.button_tcx.get_sensitive())
-        self.button_files.set_sensitive(not self.button_files.get_sensitive())
-        
-win = BackupWindow()
-Gtk.main()
