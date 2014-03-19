@@ -89,6 +89,9 @@ def writeGpx(filename, workout):
             trkpt.set('lat', str(point['Latitude']))
             trkpt.set('lon', str(point['Longitude']))
             etree.SubElement(trkpt, 'ele').text = str(point['Altitude'])
+        else:
+            trkpt.set('lat', '0.000000')
+            trkpt.set('lon', '0.000000')
         etree.SubElement(trkpt, 'time').text = (start + delta).strftime("%Y-%m-%dT%H:%M:%SZ")
         if hrm_active or footpod_active:
             extensions = etree.SubElement(trkpt, 'extensions')
