@@ -27,19 +27,6 @@ def writeTcx(filename, workout):
         gps_active = False
     hrm_active = 'Value' in workout['WorkoutInfo']['AvgHR']
     footpod_active = 'Value' in workout['WorkoutInfo']['AvgStrideRate']
-    
-    #Determine ActivityType from code
-    activityType = workout['WorkoutInfo']['ActivityType']
-    if activityType == 1:
-        workoutActivity = 'Running'
-    if activityType == 2:
-        workoutActivity = 'Walking'
-    if activityType == 3:
-        workoutActivity = 'Cycling'
-    if activityType == 14:
-        workoutActivity = 'Nordic Skiing'
-    if activityType == 999:
-        workoutActivity = 'Other'
 
     #create tcx container
     xmlns = 'http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2'
@@ -50,7 +37,7 @@ def writeTcx(filename, workout):
     tcx = etree.Element('TrainingCenterDatabase', nsmap=NSMAP) 
 
     activities = etree.SubElement(tcx, 'Activities')
-    activity = etree.SubElement(activities, 'Activity',  Sport=workoutActivity)
+    activity = etree.SubElement(activities, 'Activity',  Sport=workout['WorkoutInfo']['ActivityType'])
     etree.SubElement(activity, 'WorkoutName').text = workout['WorkoutInfo']['WorkoutName']
     etree.SubElement(activity, 'Id').text = str(start)
 

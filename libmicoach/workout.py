@@ -5,13 +5,16 @@ class Workout(object):
     
     def __init__(self, workoutId, journalItem, cookies):
         url = 'https://micoach.adidas.com/us/services/track/getChartWorkoutDetail?completedWorkoutId='
-        self.workout_request = requests.get(url + str(workoutId), cookies=cookies)
-        self.workout = self.workout_request.json()['details']
-        if 'GPSPathThumbnail' in self.workout['WorkoutInfo']:
-            del self.workout['WorkoutInfo']['GPSPathThumbnail']
-        if 'GPSActive' in self.workout['WorkoutInfo']:
+        workout_request = requests.get(url + str(workoutId), cookies=cookies)
+        self.jsonFile = workout_request.json()
+        self.jsonFile['details']['WorkoutInfo']['ActivityType'] = journalItem['activity']
+        if 'GPSPathThumbnail' in self.jsonFile['details']['WorkoutInfo']:
+            del self.jsonFile['details']['WorkoutInfo']['GPSPathThumbnail']
+        if 'GPSActive' in self.jsonFile['details']['WorkoutInfo']:
             self.updateElevations()
-        self.journalItem = journalItem
+        self.workout = self.jsonFile['details']
+        
+        
     
     def __repr__(self):
         return 'Workout ID: %s, Name: %s' % (self.workout['WorkoutInfo']['CompletedWorkoutID'],  self.workout['WorkoutInfo']['WorkoutName'])
@@ -20,7 +23,7 @@ class Workout(object):
         elevations = []
         gpspoints = [[]]
         index = 0
-        for point in self.workout['CompletedWorkoutDataPoints']:
+        for point in self.jsonFile['details']['CompletedWorkoutDataPoints']:
             
             if len(gpspoints[index]) < 512:
                 gpspoints[index].append((point['Latitude'], point['Longitude']))
@@ -38,8 +41,8 @@ class Workout(object):
                 elevations.append(result['elevation'])
             
         index = 0
-        for point in self.workout['CompletedWorkoutDataPoints']:
-            point['Altitude'] = elevations[index]
+        for point in self.jsonFile['details']['CompletedWorkoutDataPoints']:
+            point['Altitude'] = round(elevations[index], 6)
             index = index + 1
 
     def writeGpx(self, filename):
@@ -50,4 +53,4 @@ class Workout(object):
     
     def writeJson(self, filename):
         with open(filename, 'w') as workout:
-            workout.write(json.dumps(self.workout_request.json(), sort_keys=True, indent=4))
+            workout.write(json.dumps(self.jsonFile, sort_keys=True, indent=4))

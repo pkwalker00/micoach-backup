@@ -63,19 +63,7 @@ def writeGpx(filename, workout):
     etree.SubElement(trk, 'src').text = 'Adidas miCoach' + u' \u00a9' 
     etree.SubElement(trk, 'link').set('href', 'https://micoach.adidas.com/us/Track/TrackWorkout?paramworkoutid='+str(workout['WorkoutInfo']['CompletedWorkoutID'])+'#Pace')
 
-    #Determine ActivityType from code
-    activityType = workout['WorkoutInfo']['ActivityType']
-    if activityType == 1:
-        activity = 'Running'
-    if activityType == 2:
-        activity = 'Walking'
-    if activityType == 3:
-        activity = 'Cycling'
-    if activityType == 14:
-        activity = 'Nordic Skiing'
-    if activityType == 999:
-        activity = 'Other'
-    etree.SubElement(trk, 'type').text = activity
+    etree.SubElement(trk, 'type').text = workout['WorkoutInfo']['ActivityType']
 
     #add track points from from source
     trkseg = etree.SubElement(trk, 'trkseg')
