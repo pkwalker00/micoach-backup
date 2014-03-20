@@ -14,7 +14,9 @@
    <string>micoach-backup</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="folder"/>
+   <iconset theme="folder">
+    <normaloff/>
+   </iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="2">
@@ -47,6 +49,9 @@
       </property>
      </widget>
      <widget class="QToolButton" name="jsonButton">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="text">
        <string>JSON</string>
       </property>
@@ -55,6 +60,9 @@
       </property>
      </widget>
      <widget class="QToolButton" name="gpxButton">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="text">
        <string>GPX</string>
       </property>
@@ -63,6 +71,9 @@
       </property>
      </widget>
      <widget class="QToolButton" name="tcxButton">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="text">
        <string>TCX</string>
       </property>
@@ -71,6 +82,9 @@
       </property>
      </widget>
      <widget class="QToolButton" name="fileButton">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="text">
        <string/>
       </property>
@@ -102,7 +116,10 @@
    <item row="2" column="0">
     <widget class="QProgressBar" name="progressBar">
      <property name="value">
-      <number>24</number>
+      <number>0</number>
+     </property>
+     <property name="textVisible">
+      <bool>false</bool>
      </property>
     </widget>
    </item>

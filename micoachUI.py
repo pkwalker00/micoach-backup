@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'micoach.ui'
 #
-# Created: Tue Mar 18 20:03:57 2014
+# Created: Wed Mar 19 21:49:28 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,15 +47,19 @@ class Ui_Form(object):
         self.loginButton.setSizePolicy(sizePolicy)
         self.loginButton.setObjectName(_fromUtf8("loginButton"))
         self.jsonButton = QtGui.QToolButton(self.splitter)
+        self.jsonButton.setEnabled(False)
         self.jsonButton.setCheckable(True)
         self.jsonButton.setObjectName(_fromUtf8("jsonButton"))
         self.gpxButton = QtGui.QToolButton(self.splitter)
+        self.gpxButton.setEnabled(False)
         self.gpxButton.setCheckable(True)
         self.gpxButton.setObjectName(_fromUtf8("gpxButton"))
         self.tcxButton = QtGui.QToolButton(self.splitter)
+        self.tcxButton.setEnabled(False)
         self.tcxButton.setCheckable(True)
         self.tcxButton.setObjectName(_fromUtf8("tcxButton"))
         self.fileButton = QtGui.QToolButton(self.splitter)
+        self.fileButton.setEnabled(False)
         self.fileButton.setText(_fromUtf8(""))
         icon = QtGui.QIcon.fromTheme(_fromUtf8("folder"))
         self.fileButton.setIcon(icon)
@@ -73,7 +77,8 @@ class Ui_Form(object):
         self.listView.setObjectName(_fromUtf8("listView"))
         self.gridLayout.addWidget(self.listView, 1, 0, 1, 2)
         self.progressBar = QtGui.QProgressBar(Form)
-        self.progressBar.setProperty("value", 24)
+        self.progressBar.setProperty("value", 0)
+        self.progressBar.setTextVisible(False)
         self.progressBar.setObjectName(_fromUtf8("progressBar"))
         self.gridLayout.addWidget(self.progressBar, 2, 0, 1, 1)
         self.cancelButton = QtGui.QPushButton(Form)
