@@ -9,6 +9,9 @@ class miCoachUser(object):
         self.loggedin = False
         self.username = ''
         self.journal =''
+        self.distanceUnit = ''
+        self.heightUnit = ''
+        self.weightUnit = ''
     
     def __repr__(self):
         if self.loggedin == False:
@@ -25,7 +28,7 @@ class miCoachUser(object):
             self.cookies=dict(micoach_authtoken=authtoken)
             self.loggedin = True
             threading.Thread(target = self.getJournal).start()
-            self.getUserID()
+            self.getUserInfo()
         except:
             return "Login failed"
 
@@ -34,12 +37,27 @@ class miCoachUser(object):
         self.loggedin = False
         self.username = ''
         self.journal =''
+        self.distanceUnit = ''
+        self.heightUnit = ''
+        self.weightUnit = ''
     
-    def getUserID(self):
+    def getUserInfo(self):
         url = 'https://micoach.adidas.com/us/UI/Settings/General.aspx'
         request = requests.get(url, cookies=self.cookies)
         html = BeautifulSoup(request.text)
         self.username = html.find_all(id='loggedAsUserName')[0].text
+        
+        if 'checked' in html.find_all(id='rbDistanceMiles')[0].input.attrs:
+            self.distanceUnit = 'miles'
+        else:
+            self.distanceUnit = 'kilometers'
+        
+        if 'checked' in html.find_all(value='rbHeightWeightFeetPounds')[0].attrs:
+            self.heightUnit = 'feet'
+            self.weightUnit = 'pounds'
+        else:
+            self.heightUnit = 'centimeters'
+            self.weightUnit = 'kilograms'
 
     def getJournal(self):
         self.journal = Journal(self.cookies)
