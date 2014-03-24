@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'micoach.ui'
 #
-# Created: Wed Mar 19 21:49:28 2014
+# Created: Sun Mar 23 21:00:33 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -73,9 +73,6 @@ class Ui_Form(object):
         self.backupButton.setSizePolicy(sizePolicy)
         self.backupButton.setObjectName(_fromUtf8("backupButton"))
         self.gridLayout.addWidget(self.splitter, 0, 0, 1, 2)
-        self.listView = QtGui.QListView(Form)
-        self.listView.setObjectName(_fromUtf8("listView"))
-        self.gridLayout.addWidget(self.listView, 1, 0, 1, 2)
         self.progressBar = QtGui.QProgressBar(Form)
         self.progressBar.setProperty("value", 0)
         self.progressBar.setTextVisible(False)
@@ -90,6 +87,11 @@ class Ui_Form(object):
         self.cancelButton.setSizePolicy(sizePolicy)
         self.cancelButton.setObjectName(_fromUtf8("cancelButton"))
         self.gridLayout.addWidget(self.cancelButton, 2, 1, 1, 1)
+        self.journalTable = QtGui.QTableWidget(Form)
+        self.journalTable.setObjectName(_fromUtf8("journalTable"))
+        self.journalTable.setColumnCount(0)
+        self.journalTable.setRowCount(0)
+        self.gridLayout.addWidget(self.journalTable, 1, 0, 1, 2)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
