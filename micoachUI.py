@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'micoach.ui'
 #
-# Created: Sun Mar 23 21:00:33 2014
+# Created: Mon Mar 24 19:33:21 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName(_fromUtf8("Form"))
-        Form.resize(970, 458)
+        Form.resize(1032, 458)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("folder"))
         Form.setWindowIcon(icon)
         self.gridLayout = QtGui.QGridLayout(Form)
@@ -87,10 +87,20 @@ class Ui_Form(object):
         self.cancelButton.setSizePolicy(sizePolicy)
         self.cancelButton.setObjectName(_fromUtf8("cancelButton"))
         self.gridLayout.addWidget(self.cancelButton, 2, 1, 1, 1)
-        self.journalTable = QtGui.QTableWidget(Form)
+        self.journalTable = QtGui.QTableView(Form)
+        self.journalTable.setStyleSheet(_fromUtf8("alternate-background-color: rgb(170, 255, 255);"))
+        self.journalTable.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.journalTable.setTabKeyNavigation(False)
+        self.journalTable.setProperty("showDropIndicator", False)
+        self.journalTable.setDragDropOverwriteMode(False)
+        self.journalTable.setAlternatingRowColors(True)
+        self.journalTable.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
+        self.journalTable.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.journalTable.setShowGrid(False)
+        self.journalTable.setWordWrap(False)
         self.journalTable.setObjectName(_fromUtf8("journalTable"))
-        self.journalTable.setColumnCount(0)
-        self.journalTable.setRowCount(0)
+        self.journalTable.horizontalHeader().setStretchLastSection(True)
+        self.journalTable.verticalHeader().setStretchLastSection(False)
         self.gridLayout.addWidget(self.journalTable, 1, 0, 1, 2)
 
         self.retranslateUi(Form)
