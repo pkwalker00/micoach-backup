@@ -1,5 +1,6 @@
 import requests
 from libmicoach.workout import *
+from datetime import datetime
 
 class Journal(object):
     
@@ -31,3 +32,36 @@ class Journal(object):
     
     def getLatestWorkout(self):
         return self.getWorkout(self.list[-1]['workoutId'])
+    
+    def journalAsList(self,distanceType):
+        workoutList = []
+        if distanceType == 'miles':
+            unit = ' mi'
+            paceunit = ' mi/min'
+        else:
+            unit = ' km'
+            paceunit = ' km/min'
+
+        for workout in self.list:
+            time = datetime.strptime(workout['startDateTime'][:19],'%Y-%m-%dT%H:%M:%S')
+            if 'totalDistance' in workout:
+                distance = workout['totalDistance'] + unit
+            else:
+                distance = '0' + unit
+            if 'avgPace' in workout:
+                pace = workout['avgPace'] + paceunit
+            else:
+                pace = '0' + paceunit
+            workoutList.append([
+                                workout['workoutId'],
+                                workout['workoutName'],
+                                time.strftime('%Y-%m-%d'),
+                                time.strftime('%I:%M %p'),
+                                workout['activity'],
+                                workout['activeTime'],
+                                distance,
+                                pace,
+                                workout['avgHR'],
+                                workout['totalCalories']
+                                ])
+        return workoutList

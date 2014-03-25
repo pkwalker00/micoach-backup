@@ -67,3 +67,6 @@ class miCoachUser(object):
     
     def getLatestWorkout(self):
         return self.journal.getLatestWorkout()
+
+    def journalList(self):
+        return self.journal.journalAsList(self.distanceUnit)
