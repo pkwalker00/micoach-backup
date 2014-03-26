@@ -1,18 +1,17 @@
 from PyQt4 import QtGui
 from micoachUI import Ui_Form
 from journalModel import JournalTableModel
+import libmicoach.user
 
 class miCoachWindow(QtGui.QWidget, Ui_Form):
     
     def __init__(self):
         QtGui.QWidget.__init__(self)
         self.setupUi(self)
-        self.journalData = [[26653305, 'Shamrock Run 2014', '2014-03-16', '08:20 AM', 'Running', '0:42:48', '5.11 mi', '08:22 min/mi', 0, 577], 
-                [26653305, 'Shamrock Run 2014', '2014-03-16', '08:20 AM', 'Running', '0:42:48', '5.11 mi', '08:22 min/mi', 0, 577], 
-                [26653305, 'Shamrock Run 2014', '2014-03-16', '08:20 AM', 'Running', '0:42:48', '5.11 mi', '08:22 min/mi', 0, 577], 
-                [26653305, 'Shamrock Run 2014', '2014-03-16', '08:20 AM', 'Running', '0:42:48', '5.11 mi', '08:22 min/mi', 0, 577]]
+        self.journalData = [[]]
+        self.user = libmicoach.user.miCoachUser()
         self.setTableModel()
-    
+        self.loginButton.clicked.connect(self.login)
 
     def setTableModel(self):
         self.model = JournalTableModel(self.journalData)
@@ -24,6 +23,26 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.journalTable.setColumnWidth(6, 65)
         self.journalTable.setColumnWidth(8, 75)
         self.journalTable.setColumnWidth(9, 60)
+
+    def login(self):
+        if self.emailEdit.text() == '':
+            QtGui.QMessageBox.warning(self, "No Email Address", "You must enter an email address")
+            self.emailEdit.setFocus()
+            return
+        if self.passwordEdit.text() == '':
+            QtGui.QMessageBox.warning(self, "No Password", "You must enter a password")
+            self.passwordEdit.setFocus()
+            return
+        try:
+            self.user.login(self.emailEdit.text(), self.passwordEdit.text())
+            self.journalData = self.user.journalList()
+            self.setTableModel()
+        except:
+            QtGui.QMessageBox.warning(self, "Login Failed", "Login Failed:Please try again")
+            self.emailEdit.setText('')
+            self.emailEdit.setFocus()
+            self.passwordEdit.setText('')
+            self.user.logout()
 
 if __name__ == "__main__":
     import sys
