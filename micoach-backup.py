@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from micoachUI import Ui_Form
 from journalModel import JournalTableModel
 import libmicoach.user
