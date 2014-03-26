@@ -42,7 +42,7 @@ class Journal(object):
             unit = ' km'
             paceunit = ' km/min'
 
-        for workout in self.list:
+        for workout in reversed(self.list):
             time = datetime.strptime(workout['startDateTime'][:19],'%Y-%m-%dT%H:%M:%S')
             if 'totalDistance' in workout:
                 distance = workout['totalDistance'] + unit
