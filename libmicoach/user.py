@@ -27,7 +27,7 @@ class miCoachUser(object):
             authtoken = login_request.cookies['micoach_authtoken']
             self.cookies=dict(micoach_authtoken=authtoken)
             self.loggedin = True
-            threading.Thread(target = self.getJournal).start()
+            self.getJournal()
             self.getUserInfo()
         except:
             return "Login failed"
