@@ -1,6 +1,5 @@
 from libmicoach.journal import *
 from bs4 import BeautifulSoup
-import threading
 
 class miCoachUser(object):
     
@@ -23,7 +22,7 @@ class miCoachUser(object):
         url = 'https://micoach.adidas.com/us/services/login/loginuser'
         creds = {'email':user_email,'password':user_password,'errors':{}}
         try:
-            login_request = requests.post(url, data=creds, timeout=10)
+            login_request = requests.post(url, data=creds, timeout=60)
             authtoken = login_request.cookies['micoach_authtoken']
             self.cookies=dict(micoach_authtoken=authtoken)
             self.loggedin = True
