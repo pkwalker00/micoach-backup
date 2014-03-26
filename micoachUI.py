@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'micoach.ui'
 #
-# Created: Mon Mar 24 19:33:21 2014
+# Created: Tue Mar 25 18:41:03 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName(_fromUtf8("Form"))
-        Form.resize(1032, 458)
+        Form.resize(1072, 458)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("folder"))
         Form.setWindowIcon(icon)
         self.gridLayout = QtGui.QGridLayout(Form)
@@ -45,6 +45,7 @@ class Ui_Form(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.loginButton.sizePolicy().hasHeightForWidth())
         self.loginButton.setSizePolicy(sizePolicy)
+        self.loginButton.setAutoDefault(True)
         self.loginButton.setObjectName(_fromUtf8("loginButton"))
         self.jsonButton = QtGui.QToolButton(self.splitter)
         self.jsonButton.setEnabled(False)
@@ -105,6 +106,15 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
+        Form.setTabOrder(self.emailEdit, self.passwordEdit)
+        Form.setTabOrder(self.passwordEdit, self.loginButton)
+        Form.setTabOrder(self.loginButton, self.jsonButton)
+        Form.setTabOrder(self.jsonButton, self.gpxButton)
+        Form.setTabOrder(self.gpxButton, self.tcxButton)
+        Form.setTabOrder(self.tcxButton, self.fileButton)
+        Form.setTabOrder(self.fileButton, self.backupButton)
+        Form.setTabOrder(self.backupButton, self.journalTable)
+        Form.setTabOrder(self.journalTable, self.cancelButton)
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(_translate("Form", "micoach-backup", None))

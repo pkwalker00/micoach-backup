@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1032</width>
+    <width>1072</width>
     <height>458</height>
    </rect>
   </property>
@@ -46,6 +46,9 @@
       </property>
       <property name="text">
        <string>Login</string>
+      </property>
+      <property name="autoDefault">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QToolButton" name="jsonButton">
@@ -179,6 +182,18 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="9"/>
+ <tabstops>
+  <tabstop>emailEdit</tabstop>
+  <tabstop>passwordEdit</tabstop>
+  <tabstop>loginButton</tabstop>
+  <tabstop>jsonButton</tabstop>
+  <tabstop>gpxButton</tabstop>
+  <tabstop>tcxButton</tabstop>
+  <tabstop>fileButton</tabstop>
+  <tabstop>backupButton</tabstop>
+  <tabstop>journalTable</tabstop>
+  <tabstop>cancelButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
  <designerdata>
