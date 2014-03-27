@@ -31,19 +31,28 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.journalTable.setColumnWidth(9, 60)
 
     def login(self):
-        if self.emailEdit.text() == '':
-            QtGui.QMessageBox.warning(self, "No Email Address", "You must enter an email address")
-            self.emailEdit.setFocus()
-            return
-        if self.passwordEdit.text() == '':
-            QtGui.QMessageBox.warning(self, "No Password", "You must enter a password")
-            self.passwordEdit.setFocus()
-            return
-        self.progressBar.setRange(0, 0)
-        QtCore.QMetaObject.invokeMethod(self.worker, 'login', QtCore.Qt.QueuedConnection, QtCore.Q_ARG(libmicoach.user.miCoachUser, self.user), QtCore.Q_ARG(str, self.emailEdit.text()), QtCore.Q_ARG(str, self.passwordEdit.text()))
+        if self.user.loggedin:
+            self.logout()
+        else:
+            if self.emailEdit.text() == '':
+                QtGui.QMessageBox.warning(self, "No Email Address", "You must enter an email address")
+                self.emailEdit.setFocus()
+                return
+            if self.passwordEdit.text() == '':
+                QtGui.QMessageBox.warning(self, "No Password", "You must enter a password")
+                self.passwordEdit.setFocus()
+                return
+            self.emailEdit.setEnabled(False)
+            self.passwordEdit.setEnabled(False)
+            self.loginButton.setEnabled(False)
+            self.progressBar.setRange(0, 0)
+            QtCore.QMetaObject.invokeMethod(self.worker, 'login', QtCore.Qt.QueuedConnection, QtCore.Q_ARG(libmicoach.user.miCoachUser, self.user), QtCore.Q_ARG(str, self.emailEdit.text()), QtCore.Q_ARG(str, self.passwordEdit.text()))
 
     def loginFail(self):
         self.progressBar.setRange(0, 1)
+        self.emailEdit.setEnabled(True)
+        self.passwordEdit.setEnabled(True)
+        self.loginButton.setEnabled(True)
         QtGui.QMessageBox.warning(self, "Login Failed", "Login Failed:Please try again")
         self.emailEdit.setText('')
         self.emailEdit.setFocus()
@@ -52,8 +61,21 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
 
     def loggedIn(self):
         self.progressBar.setRange(0, 1)
+        self.loginButton.setText("Logout")
+        self.loginButton.setEnabled(True)
         self.journalData = self.user.journalList()
         self.setTableModel()
+    
+    def logout(self):
+        self.user.logout()
+        self.journalData = [[]]
+        self.setTableModel()
+        self.emailEdit.setEnabled(True)
+        self.emailEdit.setText('')
+        self.emailEdit.setFocus()
+        self.passwordEdit.setEnabled(True)
+        self.passwordEdit.setText('')
+        self.loginButton.setText('Login')
 
 class Worker(QtCore.QObject):
     loginComplete = QtCore.pyqtSignal()
