@@ -65,6 +65,11 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.loginButton.setEnabled(True)
         self.journalData = self.user.journalList()
         self.setTableModel()
+        self.jsonButton.setEnabled(True)
+        self.gpxButton.setEnabled(True)
+        self.tcxButton.setEnabled(True)
+        self.fileButton.setEnabled(True)
+        self.backupButton.setEnabled(True)
     
     def logout(self):
         self.user.logout()
@@ -76,6 +81,12 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.passwordEdit.setEnabled(True)
         self.passwordEdit.setText('')
         self.loginButton.setText('Login')
+        self.jsonButton.setEnabled(False)
+        self.gpxButton.setEnabled(False)
+        self.tcxButton.setEnabled(False)
+        self.fileButton.setEnabled(False)
+        self.backupButton.setEnabled(False)
+        self.cancelButton.setEnabled(False)
 
 class Worker(QtCore.QObject):
     loginComplete = QtCore.pyqtSignal()
