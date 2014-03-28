@@ -12,7 +12,7 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.user = libmicoach.user.miCoachUser()
         self.setTableModel()
         self.loginButton.clicked.connect(self.login)
-        self.thread = Thread()
+        self.thread = QtCore.QThread()
         self.worker = Worker()
         self.worker.moveToThread(self.thread)
         self.thread.start()
@@ -21,6 +21,7 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.jsonButton.clicked.connect(self.configUpdate)
         self.gpxButton.clicked.connect(self.configUpdate)
         self.tcxButton.clicked.connect(self.configUpdate)
+        self.fileButton.clicked.connect(self.folderChooser)
 
     def setTableModel(self):
         self.model = JournalTableModel(self.journalData)
@@ -140,6 +141,11 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.jsonButton.setChecked(False)
         self.gpxButton.setChecked(False)
         self.tcxButton.setChecked(False)
+    
+    def folderChooser(self):
+        self.folder = os.path.join(QtGui.QFileDialog.getExistingDirectory(self, 'Choose a folder', os.path.expanduser('~'), QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks), 'miCoach')
+        self.config.set('General', 'folder', str(self.folder))
+        self.saveConfig()
 
 class Worker(QtCore.QObject):
     loginComplete = QtCore.pyqtSignal()
@@ -152,16 +158,7 @@ class Worker(QtCore.QObject):
             self.loginComplete.emit()
         else:
             self.loginFailed.emit()
-            return
     
-class Thread(QtCore.QThread):
-    def __init__(self, parent=None):
-        QtCore.QThread.__init__(self, parent)
-    def start(self):
-        QtCore.QThread.start(self)
-    def run(self):
-        QtCore.QThread.run(self)
-
 if __name__ == "__main__":
     import sys
     app = QtGui.QApplication(sys.argv)
