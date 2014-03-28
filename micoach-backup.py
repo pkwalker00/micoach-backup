@@ -1,7 +1,7 @@
 from PyQt4 import QtGui, QtCore
 from micoachUI import Ui_Form
 from journalModel import JournalTableModel
-import libmicoach.user
+import libmicoach.user, configparser, os, calendar
 
 class miCoachWindow(QtGui.QWidget, Ui_Form):
     
@@ -18,6 +18,9 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.thread.start()
         self.worker.loginComplete.connect(self.loggedIn)
         self.worker.loginFailed.connect(self.loginFail)
+        self.jsonButton.clicked.connect(self.configUpdate)
+        self.gpxButton.clicked.connect(self.configUpdate)
+        self.tcxButton.clicked.connect(self.configUpdate)
 
     def setTableModel(self):
         self.model = JournalTableModel(self.journalData)
@@ -29,6 +32,52 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.journalTable.setColumnWidth(6, 65)
         self.journalTable.setColumnWidth(8, 75)
         self.journalTable.setColumnWidth(9, 60)
+    
+    def initializeConfig(self):
+        self.config = configparser.ConfigParser()
+        self.backupConfig = os.path.join(os.path.expanduser('~'), 'miCoach', self.user.username, 'backup.cfg')
+        if not os.path.exists(os.path.join(os.path.expanduser('~'), 'miCoach', self.user.username)):
+            try:
+                os.makedirs(os.path.join(os.path.expanduser('~'), 'miCoach', self.user.username))
+            except:
+                pass
+        try:
+            with open(self.backupConfig): pass
+        except IOError:
+            self.config['General'] = {}
+            self.saveConfig()
+        self.config.read(self.backupConfig)
+        self.json = self.config['General'].getboolean('json', False)
+        self.gpx = self.config['General'].getboolean('gpx', True)
+        self.tcx = self.config['General'].getboolean('tcx', True)
+        self.folder = self.config['General'].get('folder',  os.path.join(os.path.expanduser('~'), 'miCoach'))
+        self.jsonButton.setChecked(self.json)
+        self.gpxButton.setChecked(self.gpx)
+        self.tcxButton.setChecked(self.tcx)
+        self.configUpdate()
+
+    def configUpdate(self):
+        if self.sender() == self.jsonButton:
+            self.json = self.sender().isChecked()
+        if self.sender() == self.gpxButton:
+            self.gpx = self.sender().isChecked()
+        if self.sender() == self.tcxButton:
+            self.tcx = self.sender().isChecked()
+        
+        if not self.json and not self.gpx and not self.tcx:
+            QtGui.QMessageBox.warning(self, "Invalid Configuration", "You must choose at least one backup option")
+            self.sender().setChecked(not self.sender().isChecked())
+            self.configUpdate()
+            return
+
+        self.config.set('General', 'json', str(self.json))
+        self.config.set('General', 'gpx', str(self.gpx))
+        self.config.set('General', 'tcx', str(self.tcx))
+        self.saveConfig()
+
+    def saveConfig(self):
+        with open(self.backupConfig, 'w') as configfile:
+            self.config.write(configfile)
 
     def login(self):
         if self.user.loggedin:
@@ -47,7 +96,7 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
             self.loginButton.setEnabled(False)
             self.progressBar.setRange(0, 0)
             QtCore.QMetaObject.invokeMethod(self.worker, 'login', QtCore.Qt.QueuedConnection, QtCore.Q_ARG(libmicoach.user.miCoachUser, self.user), QtCore.Q_ARG(str, self.emailEdit.text()), QtCore.Q_ARG(str, self.passwordEdit.text()))
-
+        
     def loginFail(self):
         self.progressBar.setRange(0, 1)
         self.emailEdit.setEnabled(True)
@@ -62,6 +111,7 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
     def loggedIn(self):
         self.progressBar.setRange(0, 1)
         self.loginButton.setText("Logout")
+        self.initializeConfig()
         self.loginButton.setEnabled(True)
         self.journalData = self.user.journalList()
         self.setTableModel()
@@ -87,6 +137,9 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.fileButton.setEnabled(False)
         self.backupButton.setEnabled(False)
         self.cancelButton.setEnabled(False)
+        self.jsonButton.setChecked(False)
+        self.gpxButton.setChecked(False)
+        self.tcxButton.setChecked(False)
 
 class Worker(QtCore.QObject):
     loginComplete = QtCore.pyqtSignal()
