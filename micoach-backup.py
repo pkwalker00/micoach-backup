@@ -15,7 +15,6 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.thread = QtCore.QThread()
         self.worker = Worker()
         self.worker.moveToThread(self.thread)
-        self.thread.start()
         self.worker.loginComplete.connect(self.loggedIn)
         self.worker.loginFailed.connect(self.loginFail)
         self.jsonButton.clicked.connect(self.configUpdate)
@@ -95,8 +94,10 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
             self.emailEdit.setEnabled(False)
             self.passwordEdit.setEnabled(False)
             self.loginButton.setEnabled(False)
+            self.thread.start()
             self.progressBar.setRange(0, 0)
-            QtCore.QMetaObject.invokeMethod(self.worker, 'login', QtCore.Qt.QueuedConnection, QtCore.Q_ARG(libmicoach.user.miCoachUser, self.user), QtCore.Q_ARG(str, self.emailEdit.text()), QtCore.Q_ARG(str, self.passwordEdit.text()))
+            QtCore.QMetaObject.invokeMethod(self.worker, 'login', QtCore.Qt.QueuedConnection, QtCore.Q_ARG(libmicoach.user.miCoachUser, self.user), 
+                                                                        QtCore.Q_ARG(str, self.emailEdit.text()), QtCore.Q_ARG(str, self.passwordEdit.text()))
         
     def loginFail(self):
         self.progressBar.setRange(0, 1)
@@ -108,6 +109,7 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.emailEdit.setFocus()
         self.passwordEdit.setText('')
         self.user.logout()
+        self.thread.quit()
 
     def loggedIn(self):
         self.progressBar.setRange(0, 1)
@@ -121,6 +123,7 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.tcxButton.setEnabled(True)
         self.fileButton.setEnabled(True)
         self.backupButton.setEnabled(True)
+        self.thread.quit()
     
     def logout(self):
         self.user.logout()
@@ -150,7 +153,8 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
 class Worker(QtCore.QObject):
     loginComplete = QtCore.pyqtSignal()
     loginFailed = QtCore.pyqtSignal()
-
+    progress = QtCore.pyqtSignal()
+    
     @QtCore.pyqtSlot(libmicoach.user.miCoachUser, str, str)
     def login(self, user, email, password):
         user.login(email, password)
@@ -158,6 +162,22 @@ class Worker(QtCore.QObject):
             self.loginComplete.emit()
         else:
             self.loginFailed.emit()
+    
+    @QtCore.pyqtSlot(libmicoach.user.miCoachUser, list, dict)
+    def backupWorkouts(self, user, list, dict):
+        for workoutID in list:
+            workout = user.getWorkout(workoutID)
+            self.progress.emit()
+            filename = 'tbd'
+            if dict['json']:
+                workout.writeJson(filename + '.json')
+                self.progress.emit()
+            if dict['gpx']:
+                workout.writeGpx(filename + '.gpx')
+                self.progress.emit()
+            if dict['tcx']:
+                workout.writeTcx(filename + '.tcx')
+                self.progress.emit()
     
 if __name__ == "__main__":
     import sys
