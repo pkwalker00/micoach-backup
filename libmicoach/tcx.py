@@ -65,7 +65,10 @@ def writeTcx(filename, workout):
 
     #Add GPS and/or HRM data points
     for point in workout['CompletedWorkoutDataPoints']:
-        delta = timedelta(0, point['TimeFromStart'])
+        if 'TimeFromStart' in point:
+            delta = timedelta(0, point['TimeFromStart'])
+        else:
+            delta = timedelta(0, 0)
         trackpoint = etree.SubElement(track, 'Trackpoint')
         etree.SubElement(trackpoint, 'Time').text  = (start + delta).strftime("%Y-%m-%dT%H:%M:%SZ")
         if gps_active:			        

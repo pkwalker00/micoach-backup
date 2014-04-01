@@ -71,7 +71,10 @@ def writeGpx(filename, workout):
     #Add GPS data points
     
     for point in workout['CompletedWorkoutDataPoints']:
-        delta = timedelta(0, point['TimeFromStart'])
+        if 'TimeFromStart' in point:
+            delta = timedelta(0, point['TimeFromStart'])
+        else:
+            delta = timedelta(0, 0)
         trkpt = etree.SubElement(trkseg, 'trkpt')
         if gps_active:
             trkpt.set('lat', str(point['Latitude']))
