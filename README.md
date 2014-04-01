@@ -54,7 +54,7 @@ XML manipulation library (simplexml.py) by Mariano Reingar, LGPL license
 
 ----
 2012, Manuel Vonthron <manuel.vonthron@acadis.org>,
-2013, Patrick Walker
+2014, Patrick Walker
 
   [Adidas miCoach]: http://www.micoach.com/ 
 
