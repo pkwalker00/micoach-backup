@@ -1,4 +1,4 @@
-import requests, json
+import requests, json, calendar
 from libmicoach import polyencode, gpx, tcx
 
 class Workout(object):
@@ -44,6 +44,20 @@ class Workout(object):
         for point in self.jsonFile['details']['CompletedWorkoutDataPoints']:
             point['Altitude'] = round(elevations[index], 6)
             index = index + 1
+    
+    def year(self):
+        return self.workout['WorkoutInfo']['StartDateTime'][:4]
+    
+    def month(self):
+        return calendar.month_name[int(self.workout['WorkoutInfo']['StartDateTime'][5:-13])]
+    
+    def suggestFilename(self):
+        return self.sanitize(self.workout['WorkoutInfo']['StartDateTime'][:19] + ' - ' + self.workout['WorkoutInfo']['WorkoutName'])
+    
+    def sanitize(self, filename):
+        keepcharacters = (' ', '.', '_', '-', ':')
+        santized = ''.join(c for c in filename if c.isalnum() or c in keepcharacters).rstrip()
+        return santized
 
     def writeGpx(self, filename):
         gpx.writeGpx(filename, self.workout)
