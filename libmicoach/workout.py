@@ -49,7 +49,7 @@ class Workout(object):
         return self.workout['WorkoutInfo']['StartDateTime'][:4]
     
     def month(self):
-        return calendar.month_name[int(self.workout['WorkoutInfo']['StartDateTime'][5:-13])]
+        return self.workout['WorkoutInfo']['StartDateTime'][5:-13] + "-" + calendar.month_name[int(self.workout['WorkoutInfo']['StartDateTime'][5:-13])]
     
     def suggestFilename(self):
         return self.sanitize(self.workout['WorkoutInfo']['StartDateTime'][:19] + ' - ' + self.workout['WorkoutInfo']['WorkoutName'])

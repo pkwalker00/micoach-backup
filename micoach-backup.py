@@ -1,7 +1,7 @@
 from PyQt4 import QtGui, QtCore
 from micoachUI import Ui_Form
 from journalModel import JournalTableModel
-import libmicoach.user, configparser, os, calendar
+import libmicoach.user, configparser, os
 
 class miCoachWindow(QtGui.QWidget, Ui_Form):
     
@@ -17,10 +17,14 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.worker.moveToThread(self.thread)
         self.worker.loginComplete.connect(self.loggedIn)
         self.worker.loginFailed.connect(self.loginFail)
+        self.worker.progress.connect(self.onProgress)
+        self.worker.backupComplete.connect(self.backupComplete)
         self.jsonButton.clicked.connect(self.configUpdate)
         self.gpxButton.clicked.connect(self.configUpdate)
         self.tcxButton.clicked.connect(self.configUpdate)
         self.fileButton.clicked.connect(self.folderChooser)
+        self.backupButton.clicked.connect(self.backup)
+        self.cancelButton.clicked.connect(self.onCancel)
 
     def setTableModel(self):
         self.model = JournalTableModel(self.journalData)
@@ -150,10 +154,57 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.config.set('General', 'folder', str(self.folder))
         self.saveConfig()
 
+    def backup(self):
+        if len(self.model.checkedItems()) == 0:
+            QtGui.QMessageBox.warning(self, "No Workout Selected", "You must choose at least one workout to backup.")
+            return
+        self.backupButton.setEnabled(False)
+        self.cancelButton.setEnabled(True)
+        self.loginButton.setEnabled(False)
+        self.gpxButton.setEnabled(False)
+        self.jsonButton.setEnabled(False)
+        self.tcxButton.setEnabled(False)
+        self.fileButton.setEnabled(False)
+        count = 0
+        for workout in self.model.checkedItems():
+            count = count + 1
+            if self.json:
+                count = count + 1
+            if self.gpx:
+                count = count + 1
+            if self.tcx:
+                count = count + 1
+        self.progressBar.setRange(0, count)
+        options = {'json':self.json, 'gpx':self.gpx, 'tcx':self.tcx, 'folder':self.folder}
+        selectedWorkouts = self.model.checkedItems()
+        self.thread.start()
+        QtCore.QMetaObject.invokeMethod(self.worker, 'backupWorkouts', QtCore.Qt.QueuedConnection, QtCore.Q_ARG(libmicoach.user.miCoachUser, 
+                                                                self.user), QtCore.Q_ARG(list, selectedWorkouts), QtCore.Q_ARG(dict, options))
+    
+    def backupComplete(self):
+        self.thread.quit()
+        self.cancelButton.setEnabled(False)
+        self.backupButton.setEnabled(True)
+        self.loginButton.setEnabled(True)
+        self.jsonButton.setEnabled(True)
+        self.gpxButton.setEnabled(True)
+        self.tcxButton.setEnabled(True)
+        self.fileButton.setEnabled(True)
+        self.progressBar.setRange(0, 1)
+        self.progressBar.setValue(0)
+    
+    def onProgress(self):
+        newValue = self.progressBar.value() + 1
+        self.progressBar.setValue(newValue)
+    
+    def onCancel(self):
+        self.worker.stop()
+
 class Worker(QtCore.QObject):
     loginComplete = QtCore.pyqtSignal()
     loginFailed = QtCore.pyqtSignal()
     progress = QtCore.pyqtSignal()
+    backupComplete = QtCore.pyqtSignal()
     
     @QtCore.pyqtSlot(libmicoach.user.miCoachUser, str, str)
     def login(self, user, email, password):
@@ -164,20 +215,48 @@ class Worker(QtCore.QObject):
             self.loginFailed.emit()
     
     @QtCore.pyqtSlot(libmicoach.user.miCoachUser, list, dict)
-    def backupWorkouts(self, user, list, dict):
+    def backupWorkouts(self, user, list, options):
+        self._isRunning = True
         for workoutID in list:
+            if not self._isRunning:
+                self.backupComplete.emit()
+                return
+            QtGui.QApplication.processEvents()
             workout = user.getWorkout(workoutID)
             self.progress.emit()
-            filename = 'tbd'
-            if dict['json']:
-                workout.writeJson(filename + '.json')
+            if options['json'] and self._isRunning:
+                jsonPath = os.path.join(options['folder'], user.username, 'json', workout.year(), workout.month())
+                if not os.path.exists(jsonPath):
+                    try:
+                        os.makedirs(jsonPath)
+                    except:
+                        pass
+                workout.writeJson(os.path.join(jsonPath, workout.suggestFilename() + '.json'))
                 self.progress.emit()
-            if dict['gpx']:
-                workout.writeGpx(filename + '.gpx')
+                
+            if options['gpx'] and self._isRunning:
+                gpxPath = os.path.join(options['folder'], user.username, 'gpx', workout.year(), workout.month())
+                if not os.path.exists(gpxPath):
+                    try:
+                        os.makedirs(gpxPath)
+                    except:
+                        pass
+                workout.writeGpx(os.path.join(gpxPath, workout.suggestFilename() + '.gpx'))
                 self.progress.emit()
-            if dict['tcx']:
-                workout.writeTcx(filename + '.tcx')
+            if options['tcx'] and self._isRunning:
+                tcxPath = os.path.join(options['folder'], user.username, 'tcx', workout.year(), workout.month())
+                if not os.path.exists(tcxPath):
+                    try:
+                        os.makedirs(tcxPath)
+                    except:
+                        pass
+                workout.writeTcx(os.path.join(tcxPath, workout.suggestFilename() + '.tcx'))
                 self.progress.emit()
+        self.backupComplete.emit()
+
+    def stop(self):
+        self._isRunning = False
+    
     
 if __name__ == "__main__":
     import sys
