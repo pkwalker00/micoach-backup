@@ -20,7 +20,6 @@ Usage
 -----
 **Requirements**
   - a computer and a *miCoach* account...
-
   - [Python 3+](http://www.python.org)
   - [PyQt4](http://www.riverbankcomputing.com/software/pyqt/intro)
   - [Python Requests](https://github.com/kennethreitz/requests)
