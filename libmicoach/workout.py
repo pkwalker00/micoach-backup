@@ -11,7 +11,8 @@ class Workout(object):
         if 'GPSPathThumbnail' in self.jsonFile['details']['WorkoutInfo']:
             del self.jsonFile['details']['WorkoutInfo']['GPSPathThumbnail']
         if 'GPSActive' in self.jsonFile['details']['WorkoutInfo']:
-            self.updateElevations()
+            if 'Latitude' in self.jsonFile['details']['CompletedWorkoutDataPoints'][0] and 'Longitude' in self.jsonFile['details']['CompletedWorkoutDataPoints'][0]:
+                self.updateElevations()
         self.workout = self.jsonFile['details']
         
         

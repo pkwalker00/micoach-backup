@@ -7,7 +7,7 @@ def writeGpx(filename, workout):
     """Convert miCoach json to GPX format"""
     
     #Find what sensors were used
-    if 'GPSActive' in workout['WorkoutInfo']:
+    if 'GPSActive' in workout['WorkoutInfo'] and 'Latitude' in workout['CompletedWorkoutDataPoints'][0] and 'Longitude' in workout['CompletedWorkoutDataPoints'][0]:
         gps_active = workout['WorkoutInfo']['GPSActive']
     else:
         gps_active = False
