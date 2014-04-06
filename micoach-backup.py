@@ -3,7 +3,7 @@
 from PyQt4 import QtGui, QtCore
 from micoachUI import Ui_Form
 from journalModel import JournalTableModel
-import libmicoach.user, configparser, os
+import libmicoach.user, configparser, os, platform
 
 class miCoachWindow(QtGui.QWidget, Ui_Form):
     
@@ -224,7 +224,14 @@ class Worker(QtCore.QObject):
                 self.backupComplete.emit()
                 return
             QtGui.QApplication.processEvents()
-            workout = user.getWorkout(workoutID)
+            try:
+                workout = user.getWorkout(workoutID)
+                filename = workout.suggestFilename()
+                if platform.system() == 'Windows':
+                    filename = filename.replace(':', '-')
+            except:
+                print('Problem retrieving workout ID: %s'% workoutID)
+                self._isRunning = False
             self.progress.emit()
             if options['json'] and self._isRunning:
                 jsonPath = os.path.join(options['folder'], user.username, 'json', workout.year(), workout.month())
@@ -233,7 +240,7 @@ class Worker(QtCore.QObject):
                         os.makedirs(jsonPath)
                     except:
                         pass
-                workout.writeJson(os.path.join(jsonPath, workout.suggestFilename() + '.json'))
+                workout.writeJson(os.path.join(jsonPath, filename + '.json'))
                 self.progress.emit()
                 
             if options['gpx'] and self._isRunning:
@@ -243,7 +250,7 @@ class Worker(QtCore.QObject):
                         os.makedirs(gpxPath)
                     except:
                         pass
-                workout.writeGpx(os.path.join(gpxPath, workout.suggestFilename() + '.gpx'))
+                workout.writeGpx(os.path.join(gpxPath, filename + '.gpx'))
                 self.progress.emit()
             if options['tcx'] and self._isRunning:
                 tcxPath = os.path.join(options['folder'], user.username, 'tcx', workout.year(), workout.month())
@@ -252,7 +259,7 @@ class Worker(QtCore.QObject):
                         os.makedirs(tcxPath)
                     except:
                         pass
-                workout.writeTcx(os.path.join(tcxPath, workout.suggestFilename() + '.tcx'))
+                workout.writeTcx(os.path.join(tcxPath, filename + '.tcx'))
                 self.progress.emit()
         self.backupComplete.emit()
 
