@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from dateutil.parser import parse
-import dateutil.tz
+import dateutil.tz, platform
 from lxml import etree
 
 def writeGpx(filename, workout):
@@ -22,11 +22,12 @@ def writeGpx(filename, workout):
     start = datetime.strptime(utc, "%Y-%m-%dT%H:%M:%S")	
 
     #Use computer's local timezone to correct UTC for daylight if needed
-    delta = datetime.strptime(local, "%Y-%m-%dT%H:%M:%S") - datetime.now()
-    datetz = dateutil.tz.tzlocal().tzname(datetime.now() + delta)
+    if platform.system() != 'Windows':
+        delta = datetime.strptime(local, "%Y-%m-%dT%H:%M:%S") - datetime.now()
+        datetz = dateutil.tz.tzlocal().tzname(datetime.now() + delta)
 
-    if parse(local + datetz).timetuple().tm_isdst != 0:
-        start = start - timedelta(hours=1)
+        if parse(local + datetz).timetuple().tm_isdst != 0:
+            start = start - timedelta(hours=1)
     
     #create gpx container
     xmlns = 'http://www.topografix.com/GPX/1/1'

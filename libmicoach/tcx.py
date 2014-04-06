@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from dateutil.parser import parse
-import dateutil.tz
+import dateutil.tz, platform
 from lxml import etree
 
 def writeTcx(filename, workout):
@@ -14,11 +14,12 @@ def writeTcx(filename, workout):
     start = datetime.strptime(utc, "%Y-%m-%dT%H:%M:%S")	
 
     #Use computer's local timezone to correct UTC for daylight if needed
-    delta = datetime.strptime(local, "%Y-%m-%dT%H:%M:%S") - datetime.now()
-    datetz = dateutil.tz.tzlocal().tzname(datetime.now() + delta)
+    if platform.system() != 'Windows':
+        delta = datetime.strptime(local, "%Y-%m-%dT%H:%M:%S") - datetime.now()
+        datetz = dateutil.tz.tzlocal().tzname(datetime.now() + delta)
     
-    if parse(local + datetz).timetuple().tm_isdst != 0:
-        start = start - timedelta(hours=1)
+        if parse(local + datetz).timetuple().tm_isdst != 0:
+            start = start - timedelta(hours=1)
 
     #Find what sensors were used
     if 'GPSActive' in workout['WorkoutInfo']and 'Latitude' in workout['CompletedWorkoutDataPoints'][0] and 'Longitude' in workout['CompletedWorkoutDataPoints'][0]:
