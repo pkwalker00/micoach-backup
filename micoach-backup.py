@@ -79,6 +79,7 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
         self.config.set('General', 'json', str(self.json))
         self.config.set('General', 'gpx', str(self.gpx))
         self.config.set('General', 'tcx', str(self.tcx))
+        self.config.set('General',  'folder', self.folder)
         self.saveConfig()
 
     def saveConfig(self):
@@ -153,7 +154,7 @@ class miCoachWindow(QtGui.QWidget, Ui_Form):
     
     def folderChooser(self):
         self.folder = os.path.join(QtGui.QFileDialog.getExistingDirectory(self, 'Choose a folder', os.path.expanduser('~'), QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks), 'miCoach')
-        self.config.set('General', 'folder', str(self.folder))
+        self.config.set('General', 'folder', self.folder)
         self.saveConfig()
 
     def backup(self):

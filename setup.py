@@ -1,18 +1,16 @@
-from distutils.core import setup
-import codecs
-try:
-    codecs.lookup('mbcs')
-except LookupError:
-    ascii = codecs.lookup('ascii')
-    func = lambda name, enc=ascii: {True: enc}.get(name=='mbcs')
-    codecs.register(func) 
-    
-setup (name='micoach-backup', 
-            version='1.0', 
-            description='Simple Utility to backup miCoach Workouts', 
-            author='Patrick Walker', 
-            url='https://github.com/pkwalker00/micoach-backup', 
-            license='BSD',  
-            scripts=['micoach-backup.py'], 
-            packages=['libmicoach'], 
-            requires=['lxml(>=3.0)', 'pygobject'])
+from cx_Freeze import setup,  Executable
+
+import requests.certs,  sys
+
+buildOptions = dict(include_files = [(requests.certs.where(), 'cacert.pem')], packages = ['lxml._elementpath', 'inspect'], excludes = [])
+base = 'win32GUI' if sys.platform=='win32' else None
+
+executables = [
+    Executable('micoach-backup.py'(), base=base)
+    ]
+
+setup(name='miCoach Backup', 
+            version = '2.0', 
+            description = 'A small program for backing up your workouts', 
+            options = dict(build_exe = buildOptions), 
+            executables = executables)

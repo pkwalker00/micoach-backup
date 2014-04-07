@@ -1,4 +1,5 @@
-from libmicoach.journal import *
+from libmicoach.journal import Journal
+import requests
 from bs4 import BeautifulSoup
 
 class miCoachUser(object):

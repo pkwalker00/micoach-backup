@@ -1,5 +1,5 @@
 import requests
-from libmicoach.workout import *
+from libmicoach.workout import Workout
 from datetime import datetime
 
 class Journal(object):
