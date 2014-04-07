@@ -6,7 +6,7 @@ buildOptions = dict(include_files = [(requests.certs.where(), 'cacert.pem')], pa
 base = 'win32GUI' if sys.platform=='win32' else None
 
 executables = [
-    Executable('micoach-backup.py'(), base=base)
+    Executable('micoach-backup.py', base=base)
     ]
 
 setup(name='miCoach Backup', 
