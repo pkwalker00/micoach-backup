@@ -11,7 +11,7 @@ Description
   - the beginning of a Python implementation of *Adidas miCoach* API 
   - a small GUI for selecting and saving you workouts
 
-This was forked from Manual Vonthron's micoach-backup.  I ported it to python 3 and removed the use Mariano Reingar's SimpleXML library in favor of lxml.  I added writeGpx and a working version of writeTcx for export options. This program uses the Google Maps api to replace miCoaches rounded elevations with more accurate information.
+This was forked from Manual Vonthron's micoach-backup.  I ported it to python 3 and removed the use Mariano Reingar's SimpleXML library in favor of lxml.  I added writeGpx and a working version of writeTcx for export options. This program uses the Google Maps api to replace miCoaches rounded elevations with more accurate information. (As you can now download workout info from the miCoach website, this program is only useful for the better quality gpx, tcx files tht it produces and for extracting multiple workouts at once.)
 
 I have completely rewritten this using the requests library and json instead of the xml.  I have also rewritten the gui using Qt4 Designer. 
 
@@ -24,6 +24,7 @@ Usage
   - [PyQt4](http://www.riverbankcomputing.com/software/pyqt/intro)
   - [Python Requests](https://github.com/kennethreitz/requests)
   - [lxml](http://lxml.de/)
+  - [Beautiful Soup](http://www.crummy.com/software/BeautifulSoup/)
 
 **Installation**
 
