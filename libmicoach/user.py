@@ -20,12 +20,43 @@ class miCoachUser(object):
             return 'Logged in as %s' % (self.username)
     
     def login(self, user_email, user_password):
-        url = 'https://micoach.adidas.com/us/services/login/loginuser'
-        creds = {'email':user_email,'password':user_password,'errors':{}}
-        try:
-            login_request = requests.post(url, data=creds, timeout=60)
-            authtoken = login_request.cookies['micoach_authtoken']
-            self.cookies=dict(micoach_authtoken=authtoken)
+        try:   
+            url1 = 'https://cp.adidas.com/idp/startSSO.ping'
+            params1 = {
+                                'FirstName':'',
+                                'InErrorResource':'https://micoach.adidas.com/us/Login/OpenToken', 
+                                'LastName':'', 
+                                'PartnerSpId':'sp:micoach', 
+                                'TargetResource':'https://micoach.adidas.com/us/Login/OpenToken?popupName=login-popup',
+                                'loginUrl':'https://micoach.adidas.com/us/Login/OpenToken?popupName=login-popup', 
+                                'password':user_password, 
+                                'username':user_email, 
+                                'validator_id':'micoach'
+                                }
+            request1 = requests.post(url1, data=params1, timeout=60)
+            url2 = 'https://cp.adidas.com/sp/ACS.saml2'
+            
+            SAMLResponse = BeautifulSoup(request1.text).find_all('input')[0]['value']
+            RelayState = BeautifulSoup(request1.text).find_all('input')[1]['value']
+            params2 = {
+                                'RelayState':RelayState, 
+                                'SAMLResponse':SAMLResponse
+                                }
+            request2 = requests.post(url2,  data=params2, timeout=60)
+            url3 = 'https://micoach.adidas.com/us/Login/OpenToken'
+            
+            ot = BeautifulSoup(request2.text).find_all('input')[0]['value']
+            params3 = {
+                                'ot':ot,
+                                'popupName':'login-popup'
+                                }
+            request3 = requests.post(url3, data = params3,  timeout=60)
+            
+            self.cookies = {
+                                    'micoach_authtoken':request3.cookies['micoach_authtoken'],
+                                    'user_data':request3.cookies['user_data']
+                                    }
+        
             self.loggedin = True
             self.getJournal()
             self.getUserInfo()
