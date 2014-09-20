@@ -89,11 +89,19 @@ def writeGpx(filename, workout):
             extensions = etree.SubElement(trkpt, 'extensions')
             gpxtpx = etree.SubElement(extensions, '{%s}TrackPointExtension' % NSMAP['gpxtpx'], nsmap=NSMAP)
         if hrm_active:
-            #etree.SubElement(extensions, 'heartrate').text = str(point['HeartRate'])
-            etree.SubElement(gpxtpx, '{%s}hr' % NSMAP['gpxtpx'], nsmap = NSMAP).text = str(point['HeartRate'])
+            if 'HeartRate' in point:
+                #etree.SubElement(extensions, 'heartrate').text = str(point['HeartRate'])
+                etree.SubElement(gpxtpx, '{%s}hr' % NSMAP['gpxtpx'], nsmap = NSMAP).text = str(point['HeartRate'])
+            else:
+                #etree.SubElement(extensions, 'heartrate').text = '0'
+                etree.SubElement(gpxtpx, '{%s}hr' % NSMAP['gpxtpx'], nsmap = NSMAP).text = '0'
         if footpod_active:
-            etree.SubElement(extensions, 'cadence').text = str(point['StrideRate'])
-            etree.SubElement(gpxtpx, '{%s}cad' % NSMAP['gpxtpx'], nsmap = NSMAP).text = str(point['StrideRate'])
+            if 'StrideRate' in point:
+                #etree.SubElement(extensions, 'cadence').text = str(point['StrideRate'])
+                etree.SubElement(gpxtpx, '{%s}cad' % NSMAP['gpxtpx'], nsmap = NSMAP).text = str(point['StrideRate'])
+            else:
+                #etree.SubElement(extensions, 'cadence').text = '0'
+                etree.SubElement(gpxtpx, '{%s}cad' % NSMAP['gpxtpx'], nsmap = NSMAP).text = '0'
     
     #write completed xml to file
     etree.ElementTree(gpx).write(filename, xml_declaration=True, encoding='utf-8', pretty_print=True)
