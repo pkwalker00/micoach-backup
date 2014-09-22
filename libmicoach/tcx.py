@@ -82,7 +82,11 @@ def writeTcx(filename, workout):
             etree.SubElement(trackpoint, 'AltitudeMeters').text = str(point['Altitude'])
         if footpod_active:
             if 'StrideRate' in point:
-                etree.SubElement(trackpoint, 'DistanceMeters').text = str(point['Distance'])
+                if 'Distance' in point:
+                    etree.SubElement(trackpoint, 'DistanceMeters').text = str(point['Distance'])
+                else:
+                    etree.SubElement(trackpoint, 'DistanceMeters').text = '0'
+                
                 etree.SubElement(trackpoint, 'Cadence').text = str(point['StrideRate'])
             else:
                 etree.SubElement(trackpoint, 'DistanceMeters').text = '0'
