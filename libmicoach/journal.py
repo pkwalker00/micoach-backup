@@ -52,6 +52,8 @@ class Journal(object):
                 pace = workout['avgPace'] + paceunit
             else:
                 pace = '0' + paceunit
+            if 'avgHR' not in workout:
+                workout['avgHR'] = 0
             workoutList.append([
                                 workout['workoutId'],
                                 workout['workoutName'],
