@@ -22,6 +22,9 @@ class miCoachUser(object):
     def login(self, user_email, user_password):
         try:   
             url1 = 'https://cp.adidas.com/idp/startSSO.ping'
+            url2 = 'https://cp.adidas.com/sp/ACS.saml2'
+            url3 = 'https://micoach.adidas.com/us/Login'
+            
             params1 = {
                                 'FirstName':'',
                                 'InErrorResource':'https://micoach.adidas.com/us/Login/OpenToken', 
@@ -34,29 +37,29 @@ class miCoachUser(object):
                                 'validator_id':'micoach'
                                 }
             request1 = requests.post(url1, data=params1, timeout=60)
-            url2 = 'https://cp.adidas.com/sp/ACS.saml2'
-            
+
             SAMLResponse = BeautifulSoup(request1.text).find_all('input')[0]['value']
             RelayState = BeautifulSoup(request1.text).find_all('input')[1]['value']
+
             params2 = {
                                 'RelayState':RelayState, 
                                 'SAMLResponse':SAMLResponse
                                 }
             request2 = requests.post(url2,  data=params2, timeout=60)
-            url3 = 'https://micoach.adidas.com/us/Login/OpenToken'
-            
+
             ot = BeautifulSoup(request2.text).find_all('input')[0]['value']
             params3 = {
                                 'ot':ot,
-                                'popupName':'login-popup'
+                                'popupName':'login-popup', 
+                                'error':'',
+                                'rememberMe':'False'
                                 }
             request3 = requests.post(url3, data = params3,  timeout=60)
-            
             self.cookies = {
                                     'micoach_authtoken':request3.cookies['micoach_authtoken'],
                                     'user_data':request3.cookies['user_data']
                                     }
-        
+            print(self.cookies)
             self.loggedin = True
             self.getJournal()
             self.getUserInfo()
